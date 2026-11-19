@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autonomous Curriculum Portal - Scheme & Syllabus Engineering</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <img src="assets/atria_crest.png" alt="Atria Crest" style="height: 38px; width: 38px; object-fit: contain; margin-right: 10px; border-radius: 4px;">
+      <div>
+        <h1 class="nav-title">Atria Institute of Technology</h1>
+        <p class="nav-subtitle">Curriculum Engineering & Governance Portal (Autonomous 2024 Scheme)</p>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <div class="dept-selector-wrap">
+        <label for="deptSelect">Department:</label>
+        <select id="deptSelect" class="dept-select">
+          <!-- Populated dynamically -->
+        </select>
+        <span class="badge badge-active" id="deptStatusBadge">Active (CSE)</span>
+      </div>
+
+      <!-- Authentication / User Widget -->
+      <div class="user-auth-wrap" style="display: flex; align-items: center; gap: 8px;">
+        <!-- Logged in state -->
+        <div id="userLoggedInBlock" style="display: none; align-items: center; gap: 8px;">
+          <span class="badge" id="userRoleBadge" style="background: #1e3a8a; color: #fff; font-size: 11.5px; font-weight: 700;">HOD</span>
+          <span id="userNameDisplay" style="font-weight: 600; font-size: 13px; color: var(--text-main);">Dr. Veena</span>
+          <button class="btn btn-secondary" id="btnManageAccess" style="padding: 5px 10px; font-size: 12px; display: none; background: #fff;">⚙️ Manage Faculty Access</button>
+          <button class="btn btn-secondary" id="btnLogout" style="padding: 5px 10px; font-size: 12px; background: #fff;">Logout</button>
+        </div>
+        <!-- Guest / View-Only state -->
+        <div id="userGuestBlock" style="display: flex; align-items: center; gap: 8px;">
+          <span class="badge" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 11.5px;">👁️ View-Only Mode</span>
+          <button class="btn btn-primary" id="btnLoginModalOpen" style="padding: 6px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">🔐 Login</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Top Navigation Bar -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab="tab-home">
+      <span class="tab-icon">🏠</span> Overview
+    </button>
+    <button class="tab-btn" data-tab="tab-scheme">
+      <span class="tab-num">1</span> Scheme of Examination
+    </button>
+    <button class="tab-btn" data-tab="tab-syllabus">
+      <span class="tab-num">2</span> Course Syllabus Builder
+    </button>
+    <button class="tab-btn" data-tab="tab-preview">
+      <span class="tab-icon">📄</span> Document Preview & Export
+    </button>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- ========================================== -->
+    <!-- TAB 0: HOME / GUIDED DASHBOARD OVERVIEW     -->
+    <!-- ========================================== -->
+    <section id="tab-home" class="tab-pane active">
+      <!-- 1. Executive Banner with Live Logged-in User Context -->
+      <div class="welcome-banner">
+        <div style="display: flex; gap: 18px; align-items: center;">
+          <div class="user-avatar-circle" id="homeAvatarCircle">
+            <span id="homeAvatarText">GV</span>
+          </div>
+          <div class="welcome-text">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+              <h2 style="margin: 0; font-size: 20px;" id="homeGreetingName">Welcome, Guest Viewer</h2>
+              <span class="badge" id="homeRoleBadge" style="background: #e2e8f0; color: #334155;">VIEW-ONLY</span>
+            </div>
+            <p id="homeRoleDesc" style="margin: 0; font-size: 13px; color: #dbeafe;">
+              Viewing published curriculum for Computer Science & Engineering (2024 Scheme). Sign in with institutional credentials to enable authoring and governance.
+            </p>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+          <div class="welcome-dept-tag">
+            <span>Active Department:</span>
+            <strong id="homeDeptName">Computer Science & Engineering (CSE)</strong>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" id="btnHomeQuickLogin" style="background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.4); color: #fff;">🔐 Sign In / Switch Account</button>
+            <button class="btn btn-secondary btn-sm" id="btnHomeQuickManageAccess" style="display: none; background: #fbbf24; color: #78350f; font-weight: 700; border: none;">⚙️ Faculty Access</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Institutional KPI Metrics Row (4 Cards) -->
+      <div class="dashboard-metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon" style="background: #eff6ff; color: #1e40af;">🎓</div>
+          <div>
+            <span class="metric-label">Curriculum Regulation</span>
+            <strong class="metric-val" id="metricRegulation">2024 Scheme</strong>
+            <span class="metric-sub">Autonomous College BoS Standard</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon" style="background: #f0fdf4; color: #15803d;">📚</div>
+          <div>
+            <span class="metric-label">Program Coverage</span>
+            <strong class="metric-val" id="metricSemesters">8 Semesters</strong>
+            <span class="metric-sub">Semesters I through VIII</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon" style="background: #faf5ff; color: #7e22ce;">📋</div>
+          <div>
+            <span class="metric-label">Course Catalog</span>
+            <strong class="metric-val" id="metricCoursesCount">18+ Courses</strong>
+            <span class="metric-sub">Core, Electives, Labs & Projects</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon" style="background: #fffbeb; color: #b45309;">👥</div>
+          <div>
+            <span class="metric-label">Faculty Governance</span>
+            <strong class="metric-val" id="metricFacultyCount">4 / 12 Authorized</strong>
+            <span class="metric-sub">Appointed BoS Coordinators</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Primary Workflows (Phase 1, Phase 2, Phase 3) -->
+      <div class="dashboard-cards-grid">
+        <div class="dash-card">
+          <div class="dash-card-icon" style="background: #eff6ff; color: #1e40af;">📋</div>
+          <div class="dash-card-content">
+            <span class="dash-step-badge">Phase 1</span>
+            <h3>Scheme of Examination</h3>
+            <p>Define semester-wise course matrix, credits, Student Learning Hours (SLT: L-T-P-S), and CIA / SEE marks distribution.</p>
+            <ul class="dash-feature-list">
+              <li>✓ 16-Column Autonomous university matrix</li>
+              <li>✓ SLT hours auto-sum (L+T+P+S = TOT)</li>
+              <li>✓ Real-time AICTE credit limits validation</li>
+            </ul>
+            <button class="btn btn-primary btn-block" onclick="navigateToTab('tab-scheme')">Open Scheme Generator ➔</button>
+          </div>
+        </div>
+
+        <div class="dash-card">
+          <div class="dash-card-icon" style="background: #ecfdf5; color: #047857;">✍️</div>
+          <div class="dash-card-content">
+            <span class="dash-step-badge" style="background: #d1fae5; color: #065f46;">Phase 2</span>
+            <h3>Course Syllabus Builder</h3>
+            <p>Step-by-step guided builder for Course Outcomes (COs), Bloom's levels (CL/PL), 5-Module contents, practicals, and textbooks.</p>
+            <ul class="dash-feature-list">
+              <li>✓ 6-Step guided wizard to prevent clutter</li>
+              <li>✓ 4-Way CO-Assessment mapping matrix</li>
+              <li>✓ Conventional & Open-ended practicals</li>
+            </ul>
+            <button class="btn btn-primary btn-block" style="background: #047857;" onclick="navigateToTab('tab-syllabus')">Open Syllabus Builder ➔</button>
+          </div>
+        </div>
+
+        <div class="dash-card">
+          <div class="dash-card-icon" style="background: #fdf4ff; color: #7e22ce;">🖨️</div>
+          <div class="dash-card-content">
+            <span class="dash-step-badge" style="background: #f3e8ff; color: #6b21a8;">Final Delivery</span>
+            <h3>Export & Documents</h3>
+            <p>Download separate Scheme Word files, subject-specific syllabi (.docx), or print official BoS accreditation booklets.</p>
+            <ul class="dash-feature-list">
+              <li>✓ Download Scheme & Syllabus separately</li>
+              <li>✓ Download specific subject syllabus (.docx)</li>
+              <li>✓ Clean PDF print view with exact borders</li>
+            </ul>
+            <button class="btn btn-secondary btn-block" onclick="navigateToTab('tab-preview')">View Official Documents ➔</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Semester Curriculum Matrix & Progress Overview -->
+      <div class="card" style="margin-top: 24px;">
+        <div class="card-header-flex">
+          <div>
+            <h3 style="margin: 0; font-size: 16px;">Semester Curriculum Matrix & Implementation Status</h3>
+            <p class="text-muted" style="margin: 4px 0 0; font-size: 12px;">Overview of all 8 semesters under 2024 Scheme for Computer Science & Engineering.</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateToTab('tab-scheme')">Go to Scheme Editor ➔</button>
+          </div>
+        </div>
+        <div class="table-responsive" style="margin-top: 14px;">
+          <table class="data-table" style="width: 100%;">
+            <thead>
+              <tr style="background: #f8fafc;">
+                <th style="width: 100px;">Semester</th>
+                <th>Academic Cycle</th>
+                <th style="text-align: center;">Configured Courses</th>
+                <th style="text-align: center;">Total Credits</th>
+                <th style="text-align: center;">Total SLT Hours</th>
+                <th>Syllabus Status</th>
+                <th style="text-align: center; width: 220px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="homeSemesterTableBody">
+              <!-- Populated dynamically with all 8 semesters -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 5. Department Faculty Governance Roster -->
+      <div class="card" style="margin-top: 24px;">
+        <div class="card-header-flex">
+          <div>
+            <h3 style="margin: 0; font-size: 16px;">Department Board of Studies (BoS) Governance Roster</h3>
+            <p class="text-muted" style="margin: 4px 0 0; font-size: 12px;">Only the 4 appointed Coordinators and College Leadership (Admin, Principal, Dean, HOD) have authoring permissions.</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btnHomeManageAccess" style="display: none;">⚙️ Manage Authorizations</button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 14px;" id="homeFacultyGrid">
+          <!-- Populated dynamically with HOD, 4 coordinators, and general faculty summaries -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 1: SCHEME OF TEACHING & EXAMINATION    -->
+    <!-- ========================================== -->
+    <section id="tab-scheme" class="tab-pane">
+      <!-- Official Atria Scheme Header Banner -->
+      <div class="card" style="margin-bottom: 16px; padding: 12px 20px; display: flex; align-items: center; gap: 18px; background: #ffffff;">
+        <img src="assets/atria_logo.png" alt="Atria Institute of Technology" style="height: 46px; max-width: 250px; object-fit: contain;">
+        <div style="flex: 1; border-left: 2px solid var(--border); padding-left: 18px;">
+          <h3 style="margin: 0; font-size: 14.5px; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px;">ATRIA INSTITUTE OF TECHNOLOGY (AUTONOMOUS)</h3>
+          <p style="margin: 2px 0 0 0; font-size: 11.5px; color: var(--text-muted); font-weight: 600;">Department of Computer Science & Engineering • Scheme of Teaching & Examination (2024 Scheme)</p>
+        </div>
+      </div>
+
+      <div class="pane-header">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateToTab('tab-home')">⬅️ Back to Overview</button>
+            <span style="color: var(--text-muted); font-size: 12px;">•</span>
+            <button class="btn btn-secondary btn-sm" onclick="navigateToTab('tab-syllabus')">Next: Syllabus Builder ➔</button>
+          </div>
+          <h2>Teaching & Examination Scheme Matrix</h2>
+          <p class="text-muted">Manage semester courses, student learning hours (SLT), and marks distribution.</p>
+        </div>
+        <div class="pane-actions">
+          <div class="semester-picker">
+            <label for="semSelect">Semester:</label>
+            <select id="semSelect" class="input-select">
+              <option value="1">I Semester</option>
+              <option value="2">II Semester</option>
+              <option value="3">III Semester</option>
+              <option value="4">IV Semester</option>
+              <option value="5" selected>V Semester</option>
+              <option value="6">VI Semester</option>
+              <option value="7">VII Semester</option>
+              <option value="8">VIII Semester</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btnAddCourse">+ Add New Course</button>
+          <button class="btn btn-secondary" id="btnExportSchemeQuick" title="View & Print Scheme Only">🖨️ Print Scheme</button>
+          <button class="btn btn-secondary" id="btnDownloadSchemeDocxQuick" title="Download Scheme as Word (.docx)">📄 Scheme (.docx)</button>
+        </div>
+      </div>
+
+      <!-- Auth Notice Banner in Scheme -->
+      <div id="authNoticeScheme" class="auth-notice-banner" style="margin-bottom: 16px;"></div>
+
+      <!-- Quick Metrics -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Total Semester Credits</div>
+          <div class="metric-value" id="valTotalCredits">0</div>
+          <div class="metric-hint" id="valCreditHint">Recommended: 20-24 credits</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Total Learning Hours (TOT)</div>
+          <div class="metric-value" id="valTotalHours">0 hrs</div>
+          <div class="metric-hint">L + T + P + S</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Course Count</div>
+          <div class="metric-value" id="valCourseCount">0</div>
+          <div class="metric-hint">Theory, Labs & Projects</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Assessment Balance</div>
+          <div class="metric-value" id="valTotalMarks">0</div>
+          <div class="metric-hint" id="valCieSeeRatio">CIA: 0 | SEE: 0</div>
+        </div>
+      </div>
+
+      <!-- Search & Filter Controls -->
+      <div class="filter-bar">
+        <div class="search-input-wrap">
+          <input type="text" id="schemeSearchInput" class="form-input" placeholder="🔍 Search course by code or title...">
+        </div>
+        <div class="filter-type-wrap">
+          <label>Filter by Type:</label>
+          <select id="schemeFilterType" class="input-select">
+            <option value="ALL">All Course Types</option>
+            <option value="IPCC">IPCC only</option>
+            <option value="PCC">PCC only</option>
+            <option value="PEC">PEC (Professional Elective)</option>
+            <option value="PCCL">PCCL (Labs)</option>
+            <option value="PROJ">PROJ (Projects)</option>
+            <option value="HSMC">HSMC / AEC</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Scheme Table -->
+      <div class="card table-card">
+        <div class="table-responsive">
+          <table class="data-table" id="schemeTable">
+            <thead>
+              <tr>
+                <th rowspan="2" style="width: 40px;">Sl.</th>
+                <th rowspan="2" style="width: 70px;">Type</th>
+                <th rowspan="2" style="width: 100px;">Course Code</th>
+                <th rowspan="2">Course Title</th>
+                <th rowspan="2" style="width: 50px;">TD</th>
+                <th rowspan="2" style="width: 50px;">PSB</th>
+                <th colspan="5" class="text-center" style="background: #e2e8f0;">Student Learning Hours (SLT)</th>
+                <th colspan="4" class="text-center" style="background: #e2e8f0;">Assessment Information</th>
+                <th rowspan="2" style="width: 60px;">Credits</th>
+                <th rowspan="2" class="no-print" style="width: 120px;">Actions</th>
+              </tr>
+              <tr>
+                <th title="Lecture">L</th>
+                <th title="Tutorial">T</th>
+                <th title="Practical">P</th>
+                <th title="Self-Study">S</th>
+                <th title="Total Hours" style="font-weight: 700;">TOT</th>
+                <th title="Exam Duration">Exam (Hrs)</th>
+                <th title="Continuous Internal Assessment">CIA</th>
+                <th title="Semester End Exam">SEE</th>
+                <th title="Total Marks" style="font-weight: 700;">Total</th>
+              </tr>
+            </thead>
+            <tbody id="schemeTableBody"></tbody>
+            <tfoot id="schemeTableFoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: GUIDED SYLLABUS BUILDER (STEPPER)    -->
+    <!-- ========================================== -->
+    <section id="tab-syllabus" class="tab-pane">
+      <!-- Official Atria Syllabus Header Banner -->
+      <div class="card" style="margin-bottom: 16px; padding: 12px 20px; display: flex; align-items: center; gap: 18px; background: #ffffff;">
+        <img src="assets/atria_logo.png" alt="Atria Institute of Technology" style="height: 46px; max-width: 250px; object-fit: contain;">
+        <div style="flex: 1; border-left: 2px solid var(--border); padding-left: 18px;">
+          <h3 style="margin: 0; font-size: 14.5px; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px;">ATRIA INSTITUTE OF TECHNOLOGY (AUTONOMOUS)</h3>
+          <p style="margin: 2px 0 0 0; font-size: 11.5px; color: var(--text-muted); font-weight: 600;">Outcome-Based Education (OBE) • Detailed Course Syllabus Engineering</p>
+        </div>
+      </div>
+
+      <div class="pane-header">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateToTab('tab-scheme')">⬅️ Back to Scheme</button>
+            <span style="color: var(--text-muted); font-size: 12px;">•</span>
+            <button class="btn btn-secondary btn-sm" onclick="navigateToTab('tab-preview')">Next: Document Preview ➔</button>
+          </div>
+          <h2>Course Syllabus Builder</h2>
+          <p class="text-muted">A structured, focused wizard that guides you through one section at a time without clutter.</p>
+        </div>
+        <div class="pane-actions">
+          <label for="sylCourseSelect">Course:</label>
+          <select id="sylCourseSelect" class="input-select" style="min-width: 280px;"></select>
+          <button class="btn btn-primary" id="btnSaveSyllabus">💾 Save Syllabus</button>
+          <button class="btn btn-secondary" id="btnExportSyllabusQuick" title="View & Print This Syllabus Only">🖨️ Print Syllabus</button>
+          <button class="btn btn-secondary" id="btnDownloadSyllabusDocxQuick" title="Download This Syllabus as Word (.docx)">📄 Syllabus (.docx)</button>
+        </div>
+      </div>
+
+      <!-- Auth Notice Banner in Syllabus -->
+      <div id="authNoticeSyllabus" class="auth-notice-banner" style="margin-bottom: 16px;"></div>
+
+      <!-- Quick Course Banner -->
+      <div class="course-active-banner">
+        <div>
+          <span class="active-badge" id="lblSylType">IPCC</span>
+          <strong id="lblSylCode" style="font-size: 16px; margin: 0 8px;">BBCOAB301</strong>
+          <span id="lblSylTitle" style="font-weight: 600;">Computer Organization and Architecture</span>
+        </div>
+        <div class="course-stats-pills">
+          <span>Sem: <strong id="lblSylSemester">V</strong></span>
+          <span>Credits: <strong id="lblSylCredits">4</strong></span>
+          <span>Marks: <strong id="lblSylMarks">50 CIA / 50 SEE</strong></span>
+          <span>Hours: <strong id="lblSylSlt">42:0:28:56</strong></span>
+        </div>
+      </div>
+
+      <!-- Step Navigation Wizard Tabs -->
+      <div class="stepper-nav">
+        <button class="step-btn active" data-step="step-overview">
+          <span class="step-num">1</span> Basic Overview
+        </button>
+        <button class="step-btn" data-step="step-cos">
+          <span class="step-num">2</span> Course Outcomes (COs)
+        </button>
+        <button class="step-btn" data-step="step-assessment">
+          <span class="step-num">3</span> Assessment Mapping
+        </button>
+        <button class="step-btn" data-step="step-modules">
+          <span class="step-num">4</span> 5-Module Contents
+        </button>
+        <button class="step-btn" data-step="step-practicals" id="tabStepPracticals">
+          <span class="step-num">5</span> Practical Components
+        </button>
+        <button class="step-btn" data-step="step-books">
+          <span class="step-num">6</span> Textbooks & References
+        </button>
+      </div>
+
+      <!-- STEP 1: BASIC OVERVIEW -->
+      <div class="wizard-step active" id="step-overview">
+        <div class="card">
+          <div class="card-header-flex">
+            <h3>Step 1: Course Overview & Examination Parameters</h3>
+            <span class="badge">Metadata</span>
+          </div>
+          <div class="grid-3col">
+            <div class="form-group">
+              <label class="form-label">Examination Type (SEE)</label>
+              <select id="selExamType" class="input-select">
+                <option value="Theory">Theory</option>
+                <option value="Theory / Laboratory">Theory / Laboratory</option>
+                <option value="Laboratory">Laboratory</option>
+                <option value="Continuous Evaluation">Continuous Evaluation</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Exam Duration (Hours)</label>
+              <input type="text" id="txtExamHours" class="form-input" value="03">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Question Paper Board (PSB)</label>
+              <input type="text" id="txtPsb" class="form-input" value="CSE">
+            </div>
+          </div>
+          <div class="grid-2col" style="margin-top: 14px;">
+            <div class="form-group">
+              <label class="form-label">Prerequisites</label>
+              <textarea id="txtPrereq" class="form-textarea" rows="3" placeholder="e.g., Basic C Programming and Digital Logic Design..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Course Objectives</label>
+              <textarea id="txtObjectives" class="form-textarea" rows="3" placeholder="e.g., Understand foundational computer organization, memory hierarchy, and pipelining..."></textarea>
+            </div>
+          </div>
+          <div class="step-actions">
+            <div></div>
+            <button class="btn btn-primary" onclick="nextWizardStep('step-cos')">Next: Course Outcomes (COs) ➔</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: COURSE OUTCOMES (COs) -->
+      <div class="wizard-step" id="step-cos">
+        <div class="card">
+          <div class="card-header-flex">
+            <div>
+              <h3>Step 2: Course Outcomes (COs) & Bloom's Levels</h3>
+              <p class="text-muted" style="font-size: 12px;">Define measurable outcomes with Cognitive Level (CL: 1–6) and Psychomotor Level (PL: 1–3 or –).</p>
+            </div>
+            <button class="btn btn-sm btn-outline" id="btnAddCO">+ Add Outcome (CO)</button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="coTable">
+              <thead>
+                <tr>
+                  <th style="width: 70px;">CO</th>
+                  <th>Course Outcome Statement (At the end of the course, students will be able to...)</th>
+                  <th style="width: 140px;">CL (Highest Level)</th>
+                  <th style="width: 140px;">PL (Highest Level)</th>
+                  <th style="width: 50px;" class="no-print">Action</th>
+                </tr>
+              </thead>
+              <tbody id="coTableBody"></tbody>
+            </table>
+          </div>
+          <div class="step-actions">
+            <button class="btn btn-secondary" onclick="prevWizardStep('step-overview')">⬅ Back to Overview</button>
+            <button class="btn btn-primary" onclick="nextWizardStep('step-assessment')">Next: Assessment Mapping ➔</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: CO-ASSESSMENT MAPPING -->
+      <div class="wizard-step" id="step-assessment">
+        <div class="card">
+          <div class="card-header-flex">
+            <div>
+              <h3>Step 3: CO – Assessment Mapping Matrix</h3>
+              <p class="text-muted" style="font-size: 12px;">Specify which modules (e.g. M1, M2, M3) are evaluated in CIE I, CIE II, Assignments, and SEE.</p>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="coAssessmentTable">
+              <thead>
+                <tr>
+                  <th rowspan="2" style="width: 120px;">Course Outcome</th>
+                  <th colspan="3" class="text-center" style="background: #e2e8f0;">Continuous Internal Assessment</th>
+                  <th rowspan="2" class="text-center">Semester End Exam (SEE)</th>
+                </tr>
+                <tr>
+                  <th class="text-center">CIE I (15%)</th>
+                  <th class="text-center">CIE II (15%)</th>
+                  <th class="text-center">Assignment/Activities (20%)</th>
+                </tr>
+              </thead>
+              <tbody id="coAssessmentTableBody"></tbody>
+            </table>
+          </div>
+          <div class="step-actions">
+            <button class="btn btn-secondary" onclick="prevWizardStep('step-cos')">⬅ Back to Outcomes</button>
+            <button class="btn btn-primary" onclick="nextWizardStep('step-modules')">Next: 5-Module Contents ➔</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: 5-MODULE CONTENTS -->
+      <div class="wizard-step" id="step-modules">
+        <div class="card">
+          <div class="card-header-flex">
+            <div>
+              <h3>Step 4: Course Contents (5 Modules)</h3>
+              <p class="text-muted" style="font-size: 12px;">Detailed topics, subtopics, and textbook citations for Modules 1 through 5.</p>
+            </div>
+            <!-- Quick Module Pills -->
+            <div class="module-quick-pills" id="modTabPills">
+              <button class="mod-pill-btn active" data-mod="0">Module 1</button>
+              <button class="mod-pill-btn" data-mod="1">Module 2</button>
+              <button class="mod-pill-btn" data-mod="2">Module 3</button>
+              <button class="mod-pill-btn" data-mod="3">Module 4</button>
+              <button class="mod-pill-btn" data-mod="4">Module 5</button>
+            </div>
+          </div>
+          <div id="moduleListContainer" class="modules-wrapper"></div>
+          <div class="step-actions">
+            <button class="btn btn-secondary" onclick="prevWizardStep('step-assessment')">⬅ Back to Assessment</button>
+            <button class="btn btn-primary" onclick="nextWizardStep('step-practicals')">Next: Practical Components ➔</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5: PRACTICAL COMPONENTS -->
+      <div class="wizard-step" id="step-practicals">
+        <div class="card">
+          <div class="card-header-flex">
+            <div>
+              <h3>Step 5: Practical Components (IPCC / Laboratory)</h3>
+              <p class="text-muted" style="font-size: 12px;">Conventional Experiments (Part A) and Typical Open-Ended Experiments (Part B).</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-sm btn-outline" id="btnAddPartA">+ Add Part A Exp</button>
+              <button class="btn btn-sm btn-outline" id="btnAddPartB">+ Add Part B Exp</button>
+            </div>
+          </div>
+          <div class="grid-2col">
+            <div>
+              <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #1e40af;">PART – A: CONVENTIONAL EXPERIMENTS</h4>
+              <div id="partAContainer" class="experiment-list"></div>
+            </div>
+            <div>
+              <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #047857;">PART – B: TYPICAL OPEN-ENDED EXPERIMENTS</h4>
+              <div id="partBContainer" class="experiment-list"></div>
+            </div>
+          </div>
+          <div class="step-actions">
+            <button class="btn btn-secondary" onclick="prevWizardStep('step-modules')">⬅ Back to Modules</button>
+            <button class="btn btn-primary" onclick="nextWizardStep('step-books')">Next: Textbooks & References ➔</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6: TEXTBOOKS & REFERENCES -->
+      <div class="wizard-step" id="step-books">
+        <div class="card">
+          <div class="card-header-flex">
+            <div>
+              <h3>Step 6: Textbooks, Reference Literature & Virtual Labs</h3>
+              <p class="text-muted" style="font-size: 12px;">Prescribed books with author/publisher and digital learning resources (NPTEL, Virtual Labs).</p>
+            </div>
+          </div>
+          <div class="grid-3col">
+            <div class="book-box">
+              <div class="card-header-flex">
+                <h4>Text Books</h4>
+                <button class="btn btn-sm btn-outline" id="btnAddBook">+ Add</button>
+              </div>
+              <div id="textbookList" class="book-list"></div>
+            </div>
+            <div class="book-box">
+              <div class="card-header-flex">
+                <h4>Reference Books</h4>
+                <button class="btn btn-sm btn-outline" id="btnAddRef">+ Add</button>
+              </div>
+              <div id="referenceList" class="book-list"></div>
+            </div>
+            <div class="book-box">
+              <div class="card-header-flex">
+                <h4>Web Links / Virtual Labs</h4>
+                <button class="btn btn-sm btn-outline" id="btnAddWebLink">+ Add</button>
+              </div>
+              <div id="weblinkList" class="book-list"></div>
+            </div>
+          </div>
+          <div class="step-actions">
+            <button class="btn btn-secondary" onclick="prevWizardStep('step-practicals')">⬅ Back to Practicals</button>
+            <button class="btn btn-primary" id="btnFinishSyllabus" style="background: #15803d;">💾 Save Syllabus & Review Official Document ➔</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: OFFICIAL DOCUMENT PREVIEW & EXPORT  -->
+    <!-- ========================================== -->
+    <section id="tab-preview" class="tab-pane">
+      <div class="pane-header no-print">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateToTab('tab-syllabus')">⬅️ Back to Syllabus</button>
+            <span style="color: var(--text-muted); font-size: 12px;">•</span>
+            <button class="btn btn-secondary btn-sm" onclick="navigateToTab('tab-scheme')">Scheme Matrix ➔</button>
+          </div>
+          <h2>Official Document Preview & Export</h2>
+          <p class="text-muted">Choose to view, print, or download the <strong>Scheme</strong> and <strong>Syllabus</strong> separately or as a complete booklet.</p>
+        </div>
+        <div class="pane-actions">
+          <button class="btn btn-secondary" id="btnExportJSON">📥 Download JSON Backup</button>
+        </div>
+      </div>
+
+      <!-- Mode Selector Bar: Download / View Separately -->
+      <div class="doc-mode-bar no-print">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <span style="font-weight: 700; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Export Mode:</span>
+          <div class="doc-mode-toggle">
+            <button class="doc-toggle-btn active" data-mode="scheme" id="btnModeScheme">📋 Scheme Only</button>
+            <button class="doc-toggle-btn" data-mode="syllabus" id="btnModeSyllabus">📖 Syllabus Only</button>
+            <button class="doc-toggle-btn" data-mode="all" id="btnModeAll">📚 Both Combined</button>
+          </div>
+
+          <!-- Course filter dropdown for Syllabus mode -->
+          <div id="previewCourseFilterWrapper" style="display: none; align-items: center; gap: 6px; margin-left: 10px;">
+            <label for="previewCourseSelect" style="font-size: 13px; font-weight: 600;">Course:</label>
+            <select id="previewCourseSelect" class="input-select" style="min-width: 250px; padding: 5px 10px; font-size: 13px;"></select>
+          </div>
+        </div>
+
+        <!-- Dynamic Action Buttons -->
+        <div class="doc-mode-actions" id="previewActionButtons">
+          <!-- Filled by JS based on selected mode -->
+        </div>
+      </div>
+
+      <!-- Printable Official Document Container -->
+      <div class="official-doc" id="printableDoc">
+        <div class="official-doc-head">
+          <div class="doc-header-brand" style="display: flex; align-items: center; justify-content: center; flex-direction: column; margin-bottom: 12px; gap: 4px; text-align: center;">
+            <img src="assets/atria_logo.png" alt="Atria Institute of Technology" style="height: 60px; max-width: 320px; object-fit: contain; margin-bottom: 4px;">
+            <p style="font-size: 11px; margin: 0; font-weight: 600; letter-spacing: 0.3px;">(An Autonomous Institution Affiliated to VTU, Belagavi | Approved by AICTE, New Delhi)</p>
+            <h3 style="font-size: 14px; margin: 5px 0 3px 0; font-weight: 700; letter-spacing: 0.4px;">DEPARTMENT OF <span id="printDeptName">COMPUTER SCIENCE & ENGINEERING</span></h3>
+            <p id="printDocSubtitle" style="font-size: 12px; font-weight: 700; margin: 0; color: #1e293b;">TEACHING & EXAMINATION SCHEME (2024 REGULATION)</p>
+          </div>
+          <div class="doc-line"></div>
+        </div>
+
+        <!-- Section 1: Scheme Table -->
+        <div id="printSchemeSection">
+          <div class="print-section-header">
+            <h4 id="printSemHeader">V SEMESTER SCHEME OF TEACHING AND EXAMINATION</h4>
+          </div>
+          <div id="printSchemeTableWrapper"></div>
+        </div>
+
+        <div class="doc-page-break" id="printDocDivider" style="margin-top: 30px;"></div>
+
+        <!-- Section 2: Detailed Course Syllabus -->
+        <div id="printSyllabusSection" style="margin-top: 30px;">
+          <div id="printSyllabusContent"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal for Adding/Editing Course in Scheme -->
+  <div class="modal" id="courseModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Course to Scheme</h3>
+        <button class="btn-close" id="btnModalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="courseForm">
+          <div class="grid-3col">
+            <div class="form-group">
+              <label for="mType">Course Type *</label>
+              <select id="mType" class="input-select" required>
+                <option value="IPCC">IPCC (Integrated Professional Core)</option>
+                <option value="PCC">PCC (Professional Core Course)</option>
+                <option value="PEC">PEC (Professional Elective Course)</option>
+                <option value="OEC">OEC (Open Elective Course)</option>
+                <option value="HSMC/AEC">HSMC/AEC (Humanities/Ability)</option>
+                <option value="PCCL">PCCL (Professional Core Lab)</option>
+                <option value="PROJ">PROJ (Project / Sustainability)</option>
+                <option value="NCMC">NCMC (Non-Credit Mandatory)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="mCode">Course Code *</label>
+              <input type="text" id="mCode" class="form-input" required placeholder="e.g., BAICB501">
+            </div>
+            <div class="form-group">
+              <label for="mCredits">Credits (C) *</label>
+              <input type="number" id="mCredits" class="form-input" min="0" max="10" value="4" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="mTitle">Course Title *</label>
+            <input type="text" id="mTitle" class="form-input" required placeholder="e.g., Artificial Intelligence concepts and practice">
+          </div>
+          <div class="grid-2col">
+            <div class="form-group">
+              <label for="mTd">Teaching Department (TD)</label>
+              <input type="text" id="mTd" class="form-input" value="CSE">
+            </div>
+            <div class="form-group">
+              <label for="mPsb">Question Paper Setting Board (PSB)</label>
+              <input type="text" id="mPsb" class="form-input" value="CSE">
+            </div>
+          </div>
+
+          <label class="form-label" style="margin-top: 10px;">Student Learning Hours (SLT)</label>
+          <div class="grid-4col">
+            <div class="form-group">
+              <label for="mL">Lecture (L)</label>
+              <input type="number" id="mL" class="form-input" min="0" value="42">
+            </div>
+            <div class="form-group">
+              <label for="mT">Tutorial (T)</label>
+              <input type="number" id="mT" class="form-input" min="0" value="0">
+            </div>
+            <div class="form-group">
+              <label for="mP">Practical (P)</label>
+              <input type="number" id="mP" class="form-input" min="0" value="28">
+            </div>
+            <div class="form-group">
+              <label for="mS">Self-Study (S)</label>
+              <input type="number" id="mS" class="form-input" min="0" value="56">
+            </div>
+          </div>
+
+          <label class="form-label" style="margin-top: 10px;">Assessment Information</label>
+          <div class="grid-3col">
+            <div class="form-group">
+              <label for="mExamHours">Exam Duration (Hrs)</label>
+              <input type="number" id="mExamHours" class="form-input" value="3">
+            </div>
+            <div class="form-group">
+              <label for="mCia">CIA Marks</label>
+              <input type="number" id="mCia" class="form-input" value="50">
+            </div>
+            <div class="form-group">
+              <label for="mSee">SEE Marks</label>
+              <input type="number" id="mSee" class="form-input" value="50">
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelModal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Course to Scheme</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Login, Registration & Password Reset -->
+  <div class="modal" id="loginModal">
+    <div class="modal-dialog" style="max-width: 680px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin: 0;">🏛️ Institutional Access & Identity Portal</h3>
+          <p style="margin: 4px 0 0; font-size: 13px; color: var(--text-muted);">
+            Sign in, self-register for document access, or reset your password via OTP.
+          </p>
+        </div>
+        <button class="btn-close" id="btnLoginModalClose">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Auth Sub-Tabs -->
+        <div class="auth-nav-tabs">
+          <button type="button" class="auth-tab-btn active" id="tabBtnSignIn" data-auth-pane="paneSignIn">🔐 Sign In</button>
+          <button type="button" class="auth-tab-btn" id="tabBtnRegister" data-auth-pane="paneRegister">📝 Self-Register (View-Only)</button>
+          <button type="button" class="auth-tab-btn" id="tabBtnReset" data-auth-pane="paneReset">🔄 Reset Password (OTP)</button>
+        </div>
+
+        <!-- PANE 1: SIGN IN -->
+        <div id="paneSignIn" class="auth-pane-view">
+          <form id="credentialLoginForm" style="background: #f8fafc; border: 1px solid var(--border); padding: 18px 20px; border-radius: 8px; margin-bottom: 20px;">
+            <div id="loginAlertBox" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 14px;"></div>
+
+            <div style="margin-bottom: 14px;">
+              <label for="loginInputEmail" style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--text-main);">
+                Institutional Email (Format: <code>username_departmentname@atria.edu.in</code>):
+              </label>
+              <input type="email" id="loginInputEmail" class="form-input" placeholder="e.g. veena_cse@atria.edu.in or deviprasad_cse@atria.edu.in" required style="width: 100%; font-size: 14px;">
+              <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px;">Must follow official syntax: <code>username_dept@atria.edu.in</code></span>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label for="loginInputPassword" style="font-weight: 700; font-size: 13px; color: var(--text-main);">Password:</label>
+                <button type="button" id="btnTogglePassword" style="background: none; border: none; font-size: 11.5px; color: var(--primary); cursor: pointer; text-decoration: underline;">Show Password</button>
+              </div>
+              <input type="password" id="loginInputPassword" class="form-input" placeholder="Enter your password" required style="width: 100%; font-size: 14px;">
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px;">
+              <div style="display: flex; gap: 12px; font-size: 12px;">
+                <a href="#" id="linkGotoForgot" style="color: var(--primary); text-decoration: none;">Forgot Password?</a>
+                <span style="color: #cbd5e1;">•</span>
+                <a href="#" id="linkGotoRegister" style="color: var(--primary); text-decoration: none;">New User? Register</a>
+              </div>
+              <button type="submit" class="btn btn-primary" style="padding: 9px 24px; font-weight: 700;">Sign In ➔</button>
+            </div>
+          </form>
+
+          <!-- Credentials Directory / Quick Fill for Testing -->
+          <div style="border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden;">
+            <div id="toggleCredentialsDir" style="background: #eff6ff; padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 15px;">🔑</span>
+                <strong style="color: #1e40af; font-size: 12.5px;">Institutional Accounts & Test Passwords (Click to Auto-fill)</strong>
+              </div>
+              <span id="credentialsDirChevron" style="font-size: 12px; color: #1e40af; font-weight: 700;">▼ Click to Expand</span>
+            </div>
+
+            <div id="credentialsDirContent" style="display: none; padding: 14px; max-height: 280px; overflow-y: auto; background: #ffffff;">
+              <div style="margin-bottom: 12px;">
+                <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #1e40af; letter-spacing: 0.5px;">Institutional Leadership & Admin</span>
+                <div id="dirLeadershipList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;"></div>
+              </div>
+              <div style="margin-bottom: 12px;">
+                <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #047857; letter-spacing: 0.5px;">Authorized BoS Coordinators (4 Appointed Faculty)</span>
+                <div id="dirCoordinatorList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;"></div>
+              </div>
+              <div>
+                <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 0.5px;">General Faculty (View-Only)</span>
+                <div id="dirFacultyList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 2: SELF-REGISTRATION (VIEW-ONLY ACCESS) -->
+        <div id="paneRegister" class="auth-pane-view" style="display: none;">
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 12.5px; color: #166534;">
+            <strong>ℹ️ Self-Registration Policy:</strong> All faculty members, research scholars, and students can register directly to search, view, and download all official schemes and syllabi (.docx & PDF). Authoring permissions are granted exclusively by the Department HOD and College Administration.
+          </div>
+
+          <form id="selfRegistrationForm" style="background: #f8fafc; border: 1px solid var(--border); padding: 18px 20px; border-radius: 8px;">
+            <div id="registerAlertBox" style="display: none; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 14px;"></div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+              <div>
+                <label for="regFullName" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Full Name (with Title):</label>
+                <input type="text" id="regFullName" class="form-input" placeholder="e.g. Prof. Arvind Kumar" required style="width: 100%;">
+              </div>
+              <div>
+                <label for="regEmail" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Institutional Email (Format: <code>username_dept@atria.edu.in</code>):</label>
+                <input type="email" id="regEmail" class="form-input" placeholder="e.g. arvind_cse@atria.edu.in" required style="width: 100%;">
+                <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 3px;">Mandatory format: <code>username_departmentname@atria.edu.in</code></span>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+              <div>
+                <label for="regDept" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Department:</label>
+                <select id="regDept" class="form-input" style="width: 100%;">
+                  <option value="CSE" selected>Computer Science & Engineering (CSE)</option>
+                  <option value="ECE">Electronics & Communication (ECE)</option>
+                  <option value="ME">Mechanical Engineering (ME)</option>
+                  <option value="CIVIL">Civil Engineering (CIVIL)</option>
+                  <option value="GEN">Basic Science & Humanities</option>
+                </select>
+              </div>
+              <div>
+                <label for="regRole" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Academic Role / Category:</label>
+                <select id="regRole" class="form-input" style="width: 100%;">
+                  <option value="Faculty (General)" selected>Department Teaching Faculty</option>
+                  <option value="Research Scholar">Research Scholar / PhD</option>
+                  <option value="Student">Student Viewer</option>
+                  <option value="Staff">Academic Staff</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+              <div>
+                <label for="regPassword" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Create Password:</label>
+                <input type="password" id="regPassword" class="form-input" placeholder="At least 6 characters" required style="width: 100%;">
+              </div>
+              <div>
+                <label for="regPasswordConfirm" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Confirm Password:</label>
+                <input type="password" id="regPasswordConfirm" class="form-input" placeholder="Re-enter password" required style="width: 100%;">
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border);">
+              <span style="font-size: 12px; color: var(--text-muted);">Default Permission: <strong>View & Download Access</strong></span>
+              <button type="submit" class="btn btn-primary" style="padding: 9px 24px; font-weight: 700;">Complete Registration ➔</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- PANE 3: RESET PASSWORD VIA OTP -->
+        <div id="paneReset" class="auth-pane-view" style="display: none;">
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 12.5px; color: #1e40af;">
+            <strong>🔐 Password Recovery via Registered Email:</strong> Enter your registered college email ID to receive a secure 6-digit One-Time Password (OTP).
+          </div>
+
+          <div id="resetAlertBox" style="display: none; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 14px;"></div>
+
+          <!-- Step 1: Request OTP Form -->
+          <div id="resetStep1Box" style="background: #f8fafc; border: 1px solid var(--border); padding: 18px 20px; border-radius: 8px; margin-bottom: 16px;">
+            <div style="margin-bottom: 14px;">
+              <label for="resetInputEmail" style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--text-main);">
+                Enter Your Registered Institutional Email (<code>username_dept@atria.edu.in</code>):
+              </label>
+              <input type="email" id="resetInputEmail" class="form-input" placeholder="e.g. deviprasad_cse@atria.edu.in or suresh_cse@atria.edu.in" style="width: 100%; font-size: 14px;">
+            </div>
+            <button type="button" class="btn btn-primary btn-block" id="btnSendResetOtp" style="padding: 9px 18px; font-weight: 700;">Send Verification OTP ➔</button>
+          </div>
+
+          <!-- Step 2: Simulated OTP Notification & Reset Form (Hidden until OTP sent) -->
+          <div id="resetStep2Box" style="display: none;">
+            <!-- Simulated Mail Notification Box -->
+            <div class="otp-simulated-box">
+              <span style="font-size: 20px;">📧</span>
+              <div>
+                <strong>Simulated Institutional Mail Delivery</strong>
+                <p style="margin: 2px 0 6px; font-size: 12px; color: #14532d;">
+                  A verification code has been dispatched to <strong id="otpTargetEmailText"></strong>.
+                </p>
+                <div>Your One-Time Password is: <div class="otp-code-highlight" id="simulatedOtpDisplay">123456</div></div>
+                <div style="font-size: 11px; color: #15803d; margin-top: 4px;">Valid for 10 minutes. Enter it below to set your new password.</div>
+              </div>
+            </div>
+
+            <form id="resetVerifyForm" style="background: #f8fafc; border: 1px solid var(--border); padding: 18px 20px; border-radius: 8px;">
+              <div style="margin-bottom: 14px;">
+                <label for="resetInputOtp" style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px;">
+                  Enter 6-Digit OTP Code:
+                </label>
+                <input type="text" id="resetInputOtp" class="form-input" placeholder="e.g. 849201" maxlength="6" required style="width: 100%; font-size: 16px; font-family: monospace; letter-spacing: 4px; text-align: center;">
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+                <div>
+                  <label for="resetNewPassword" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">New Password:</label>
+                  <input type="password" id="resetNewPassword" class="form-input" placeholder="Enter new password" required style="width: 100%;">
+                </div>
+                <div>
+                  <label for="resetConfirmPassword" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Confirm New Password:</label>
+                  <input type="password" id="resetConfirmPassword" class="form-input" placeholder="Re-enter new password" required style="width: 100%;">
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block" style="padding: 9px 18px; font-weight: 700;">Verify OTP & Update Password ➔</button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Faculty Governance & Authorization Management -->
+  <div class="modal" id="accessManagementModal">
+    <div class="modal-dialog" style="max-width: 980px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin: 0;">⚙️ Faculty Access & Authorization Governance</h3>
+          <p style="margin: 4px 0 0; font-size: 13px; color: var(--text-muted);">
+            Manage permissions, bulk register faculty, edit user profiles, and delete multiple users.
+          </p>
+        </div>
+        <button class="btn-close" id="btnAccessModalClose">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Access Modal Sub-Tabs -->
+        <div class="auth-nav-tabs" style="margin-bottom: 14px;">
+          <button type="button" class="auth-tab-btn active" id="tabBtnAccessList" data-access-pane="paneAccessList">📋 Faculty Roster & Permissions</button>
+          <button type="button" class="auth-tab-btn" id="tabBtnAccessRegister" data-access-pane="paneAccessRegister">➕ Batch Add Multiple Faculty</button>
+          <button type="button" class="auth-tab-btn" id="tabBtnAccessBulkPaste" data-access-pane="paneAccessBulkPaste">⚡ Fast CSV / Text Paste</button>
+        </div>
+
+        <!-- PANE A: FACULTY LIST & AUTHORIZATIONS -->
+        <div id="paneAccessList" class="access-pane-view">
+          
+          <!-- Search, Filter & Stat Pills Toolbar -->
+          <div style="background: var(--surface); border: 1px solid var(--border); padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; gap: 10px; align-items: center; flex: 1; min-width: 280px;">
+              <input type="text" id="facultySearchInput" class="form-input" placeholder="🔍 Search by name, email, or designation..." style="width: 100%; max-width: 320px;">
+              <select id="facultyFilterRole" class="form-input" style="max-width: 180px;">
+                <option value="ALL">All Permissions</option>
+                <option value="AUTH">Authorized Coordinators</option>
+                <option value="VIEW">View-Only Faculty</option>
+              </select>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <span class="badge" id="facultyPillTotal" style="background: #e2e8f0; color: #334155;">Total: 12</span>
+              <span class="badge" id="facultyPillAuth" style="background: #ecfdf5; color: #047857;">Authorized: 4</span>
+              <span class="badge" id="facultyPillView" style="background: #f1f5f9; color: #475569;">View-Only: 8</span>
+            </div>
+          </div>
+
+          <!-- Dynamic Bulk Actions Toolbar (visible when 1+ users checked) -->
+          <div id="facultyBulkActionsBar" class="bulk-actions-toolbar" style="display: none;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 16px;">☑️</span>
+              <strong id="bulkSelectedCountText" style="color: #1e40af; font-size: 13px;">0 users selected</strong>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn btn-sm btn-primary" id="btnBulkAuthorizeFaculty" title="Grant authoring permissions to selected users">🔑 Grant Edit Access</button>
+              <button type="button" class="btn btn-sm btn-secondary" id="btnBulkRevokeFaculty" title="Revoke authoring permissions from selected users">🔒 Set to View-Only</button>
+              <button type="button" class="btn btn-sm btn-danger" id="btnBulkDeleteFaculty" title="Delete selected users permanently">🗑️ Delete Selected</button>
+            </div>
+          </div>
+
+          <div style="max-height: 420px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px;">
+            <table class="data-table" style="width: 100%; margin: 0;">
+              <thead>
+                <tr style="background: #f8fafc; position: sticky; top: 0; z-index: 10;">
+                  <th style="width: 36px; text-align: center;">
+                    <input type="checkbox" id="chkSelectAllFaculty" title="Select All Users" style="width: 16px; height: 16px; cursor: pointer;">
+                  </th>
+                  <th style="width: 36px; text-align: center;">#</th>
+                  <th>Faculty Member Details</th>
+                  <th>Institutional Email</th>
+                  <th style="text-align: center; width: 80px;">Dept</th>
+                  <th style="text-align: center; width: 160px;">Authoring Permission</th>
+                  <th style="text-align: center; width: 140px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="facultyRosterTableBody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="modal-footer" style="margin-top: 16px; padding: 0; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: var(--text-muted);">
+              💡 Checkboxes control editing permissions. Click <strong>Edit</strong> to modify name, email or password.
+            </span>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary" id="btnCancelAccessModal">Cancel</button>
+              <button class="btn btn-primary" id="btnSaveFacultyAccess">💾 Save & Apply Permissions</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE B: BATCH MULTI-ROW FACULTY ENROLLMENT -->
+        <div id="paneAccessRegister" class="access-pane-view" style="display: none;">
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 12px 16px; border-radius: 6px; margin-bottom: 14px; font-size: 12.5px; color: #1e40af; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong>➕ Batch Multi-Row Faculty Registration:</strong> Add multiple faculty members in a single step. Click <strong>+ Add Another Row</strong> to add as many faculty members as needed.
+            </div>
+            <button type="button" class="btn btn-sm btn-outline" id="btnAddMultiRow">+ Add Another Row</button>
+          </div>
+
+          <div id="multiRegAlertBox" style="display: none; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 12px;"></div>
+
+          <form id="multiFacultyEnrollForm">
+            <div style="max-height: 380px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 16px;">
+              <table class="data-table" style="width: 100%; margin: 0;">
+                <thead>
+                  <tr style="background: #f8fafc; position: sticky; top: 0; z-index: 10;">
+                    <th style="width: 30px; text-align: center;">#</th>
+                    <th>Full Name</th>
+                    <th>Designation</th>
+                    <th>Email ID</th>
+                    <th style="width: 110px;">Dept</th>
+                    <th style="width: 120px;">Password</th>
+                    <th style="text-align: center; width: 100px;">Authorize?</th>
+                    <th style="width: 40px; text-align: center;"></th>
+                  </tr>
+                </thead>
+                <tbody id="multiFacultyRowsBody">
+                  <!-- Dynamic rows generated here -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="modal-footer" style="padding: 0; display: flex; justify-content: space-between; align-items: center;">
+              <button type="button" class="btn btn-secondary" id="btnResetMultiRows">Clear All Rows</button>
+              <button type="submit" class="btn btn-primary" id="btnSubmitMultiFaculty" style="padding: 9px 24px; font-weight: 700;">
+                💾 Register All Faculty Members ➔
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- PANE C: FAST CSV / TEXT PASTE IMPORT -->
+        <div id="paneAccessBulkPaste" class="access-pane-view" style="display: none;">
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px 16px; border-radius: 6px; margin-bottom: 14px; font-size: 12.5px; color: #166534; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong>⚡ Fast CSV / Quick Paste:</strong> Paste multiple faculty lines at once. Format: <code>Full Name, Designation, Email, Dept, Password, CanEdit(Y/N)</code>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline" id="btnLoadSampleCsv" style="border-color: #86efac; color: #166534;">📋 Load Sample Data</button>
+          </div>
+
+          <div id="bulkPasteAlertBox" style="display: none; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 12px;"></div>
+
+          <div style="margin-bottom: 14px;">
+            <textarea id="bulkPasteTextarea" class="form-input" rows="8" placeholder="Dr. R. K. Mishra, Professor, mishra@college.edu, CSE, coord@123, Y&#10;Prof. Sunita Sen, Assistant Professor, sunita@college.edu, CSE, faculty@123, N" style="width: 100%; font-family: monospace; font-size: 12.5px; line-height: 1.5;"></textarea>
+          </div>
+
+          <div class="modal-footer" style="padding: 0; display: flex; justify-content: space-between; align-items: center;">
+            <button type="button" class="btn btn-secondary" id="btnClearBulkPaste">Clear Text</button>
+            <button type="button" class="btn btn-primary" id="btnSubmitBulkPaste" style="padding: 9px 24px; font-weight: 700;">
+              ⚡ Parse & Import All Faculty ➔
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Editing Faculty Details -->
+  <div class="modal" id="editFacultyModal">
+    <div class="modal-dialog" style="max-width: 580px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin: 0;">✏️ Edit Faculty Member Details</h3>
+          <p style="margin: 4px 0 0; font-size: 13px; color: var(--text-muted);">
+            Update name, designation, email, department, password, or authoring access.
+          </p>
+        </div>
+        <button class="btn-close" id="btnEditFacultyModalClose">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="editFacultyForm">
+          <input type="hidden" id="editFacultyId">
+          <div id="editFacultyAlertBox" style="display: none; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 14px;"></div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div>
+              <label for="editFacultyName" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Full Name:</label>
+              <input type="text" id="editFacultyName" class="form-input" required style="width: 100%;">
+            </div>
+            <div>
+              <label for="editFacultyDesignation" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Designation:</label>
+              <input type="text" id="editFacultyDesignation" class="form-input" required style="width: 100%;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div>
+              <label for="editFacultyEmail" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Email ID:</label>
+              <input type="email" id="editFacultyEmail" class="form-input" required style="width: 100%;">
+            </div>
+            <div>
+              <label for="editFacultyDept" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Department:</label>
+              <select id="editFacultyDept" class="form-input" style="width: 100%;">
+                <option value="CSE">Computer Science & Engineering (CSE)</option>
+                <option value="ECE">Electronics & Communication (ECE)</option>
+                <option value="ME">Mechanical Engineering (ME)</option>
+                <option value="CIVIL">Civil Engineering (CIVIL)</option>
+                <option value="GEN">Basic Science & Humanities</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <label for="editFacultyPassword" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Password (Change or Reset):</label>
+            <input type="text" id="editFacultyPassword" class="form-input" required style="width: 100%; font-family: monospace;">
+            <span style="font-size: 11px; color: var(--text-muted);">You can view or update the user's password directly.</span>
+          </div>
+
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 12px 14px; border-radius: 6px; margin-bottom: 16px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; font-size: 13px; color: #1e40af;">
+              <input type="checkbox" id="editFacultyCanEdit" style="width: 18px; height: 18px; cursor: pointer;">
+              Authorize as BoS Curriculum Coordinator (Can Edit Schemes & Syllabi)
+            </label>
+          </div>
+
+          <div class="modal-footer" style="padding: 0; margin-top: 16px; display: flex; justify-content: flex-end; gap: 8px;">
+            <button type="button" class="btn btn-secondary" id="btnCancelEditFacultyModal">Cancel</button>
+            <button type="submit" class="btn btn-primary" style="padding: 8px 22px;">💾 Save Faculty Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+        <button class="btn-close" id="btnAccessModalClose">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Access Modal Sub-Tabs -->
+        <div class="auth-nav-tabs" style="margin-bottom: 14px;">
+          <button type="button" class="auth-tab-btn active" id="tabBtnAccessList" data-access-pane="paneAccessList">📋 Department Faculty Roster</button>
+          <button type="button" class="auth-tab-btn" id="tabBtnAccessRegister" data-access-pane="paneAccessRegister">➕ Register Faculty with Authoring Access</button>
+        </div>
+
+        <!-- PANE A: FACULTY LIST & AUTHORIZATIONS -->
+        <div id="paneAccessList" class="access-pane-view">
+          <div style="background: var(--primary-light); padding: 12px 16px; border-radius: 6px; border: 1px solid #bfdbfe; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="color: var(--primary-dark);">Current Authorization Ratio:</strong>
+              <span id="authCountBadge" style="margin-left: 6px; font-weight: 700; font-size: 13px;">4 of 12 faculty currently authorized to edit.</span>
+            </div>
+            <span class="badge" style="background: #1e3a8a; color: #fff;">Leadership Governance</span>
+          </div>
+
+          <div style="max-height: 380px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px;">
+            <table class="data-table" style="width: 100%; margin: 0;">
+              <thead>
+                <tr style="background: #f8fafc;">
+                  <th style="width: 40px; text-align: center;">#</th>
+                  <th>Faculty Name & Designation</th>
+                  <th>Email ID</th>
+                  <th>Department</th>
+                  <th style="text-align: center; width: 170px;">Authoring Permission</th>
+                  <th style="text-align: center; width: 90px;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="facultyRosterTableBody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="modal-footer" style="margin-top: 16px; padding: 0;">
+            <button class="btn btn-secondary" id="btnCancelAccessModal">Cancel</button>
+            <button class="btn btn-primary" id="btnSaveFacultyAccess">💾 Save & Apply Permissions</button>
+          </div>
+        </div>
+
+        <!-- PANE B: ADMIN REGISTRATION OF FACULTY -->
+        <div id="paneAccessRegister" class="access-pane-view" style="display: none;">
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 12.5px; color: #1e40af;">
+            <strong>👑 Administrative Faculty Enrollment:</strong> Register a new faculty member directly into the department BoS roster and assign an initial password. The faculty member can sign in immediately and reset their password anytime using their registered email OTP.
+          </div>
+
+          <form id="adminFacultyEnrollForm" style="background: #f8fafc; border: 1px solid var(--border); padding: 18px 20px; border-radius: 8px;">
+            <div id="adminEnrollAlertBox" style="display: none; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 14px;"></div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+              <div>
+                <label for="adminRegName" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Faculty Full Name:</label>
+                <input type="text" id="adminRegName" class="form-input" placeholder="e.g. Dr. Harish Rao" required style="width: 100%;">
+              </div>
+              <div>
+                <label for="adminRegDesignation" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Designation:</label>
+                <input type="text" id="adminRegDesignation" class="form-input" placeholder="e.g. Associate Professor" required style="width: 100%;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+              <div>
+                <label for="adminRegEmail" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Institutional Email ID:</label>
+                <input type="email" id="adminRegEmail" class="form-input" placeholder="e.g. harish@college.edu" required style="width: 100%;">
+              </div>
+              <div>
+                <label for="adminRegDept" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Department:</label>
+                <select id="adminRegDept" class="form-input" style="width: 100%;">
+                  <option value="CSE" selected>Computer Science & Engineering (CSE)</option>
+                  <option value="ECE">Electronics & Communication (ECE)</option>
+                  <option value="ME">Mechanical Engineering (ME)</option>
+                  <option value="CIVIL">Civil Engineering (CIVIL)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+              <div>
+                <label for="adminRegPassword" style="display: block; font-weight: 700; font-size: 12.5px; margin-bottom: 5px;">Initial Temporary Password:</label>
+                <input type="text" id="adminRegPassword" class="form-input" value="coord@123" required style="width: 100%; font-family: monospace;">
+              </div>
+              <div style="display: flex; flex-direction: column; justify-content: center; padding-top: 14px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; font-size: 13px; color: #1e3a8a;">
+                  <input type="checkbox" id="adminRegCanEdit" checked style="width: 18px; height: 18px;">
+                  Authorize as Curriculum Coordinator (Can Edit)
+                </label>
+              </div>
+            </div>
+
+            <div class="modal-footer" style="padding: 0; margin-top: 16px;">
+              <button type="submit" class="btn btn-primary" style="padding: 9px 24px; font-weight: 700;">Enroll Faculty & Issue Credentials ➔</button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

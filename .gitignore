@@ -1,0 +1,14 @@
+# Internal system hooks & temp
+.buyer-execution-hooks/
+check_logos.py
+extract_all_media.py
+inspect_header.py
+inspect_syllabus_header.py
+setup_assets.py
+test_docx_logo.py
+test_logo.docx
+__pycache__/
+*.pyc
+
+# Local runtime logs
+*.log
