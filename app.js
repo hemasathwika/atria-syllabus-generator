@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!appState) {
     appState = {
       departments: [
-        { code: 'CSE', name: 'Computer Science & Engineering', status: 'Active (Pilot)', hod: 'Dr. Veena / Dr. Devi Prasad', schemes: {}, syllabi: {} },
+        { code: 'CSE', name: 'Computer Science & Engineering', status: 'Active (Pilot)', hod: 'Dr. Devi Prasad', schemes: {}, syllabi: {} },
         { code: 'ECE', name: 'Electronics & Communication Engineering', status: 'Ready for Setup', hod: 'To be appointed', schemes: {}, syllabi: {} },
         { code: 'ME', name: 'Mechanical Engineering', status: 'Ready for Setup', hod: 'To be appointed', schemes: {}, syllabi: {} },
         { code: 'CIVIL', name: 'Civil Engineering', status: 'Ready for Setup', hod: 'To be appointed', schemes: {}, syllabi: {} }
@@ -181,7 +181,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   function showAuthLandingView(message = '') {
     if (authLandingView) authLandingView.style.display = 'flex';
     if (appMainView) appMainView.style.display = 'none';
-    renderLoginLists();
+    // NOTE: the login gate never renders the institutional accounts directory.
+    // Credentials are shown only inside the admin dashboard (renderAccountDirectory).
     if (message) {
       const loginAlertBox = document.getElementById('loginAlertBox');
       if (loginAlertBox) {
@@ -317,44 +318,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     renderSchemeTable();
+
+    // Institutional accounts directory: admin-only, and only inside the app dashboard.
+    renderAccountDirectory();
   }
 
-  function openLoginModal(message = '') {
-    if (!loginModal) return;
-    renderLoginLists();
-    loginModal.classList.add('show');
-    loginModal.classList.add('active');
-  }
+  // Deliberately NOT rendered on the login gate: visitors must never see credentials.
+  // 1.4 Institutional accounts directory — ADMIN ONLY, rendered inside the app dashboard.
+  // Deliberately NOT rendered on the login gate: visitors must never see credentials.
+  let showAccountPasswords = false;
 
-  function closeLoginModal() {
-    if (loginModal) {
-      loginModal.classList.remove('show');
-      loginModal.classList.remove('active');
-    }
-  }
+  function renderAccountDirectory() {
+    const card = document.getElementById('adminDirectoryCard');
+    const isAdmin = !!(currentUser && (currentUser.role || '').toUpperCase() === 'ADMIN');
 
-  function renderLoginLists() {
+    if (card) card.style.display = isAdmin ? 'block' : 'none';
+    if (!card || !isAdmin) return;
+
     const auth = appState.auth_system || {};
     const leadList = document.getElementById('dirLeadershipList');
     const authList = document.getElementById('dirCoordinatorList');
     const genList = document.getElementById('dirFacultyList');
 
-    function createQuickFillRow(user, defaultPwd = 'college@123') {
+    function createAccountRow(user, defaultPwd = 'college@123') {
       const pwd = user.password || defaultPwd;
+      const pwdCell = showAccountPasswords
+        ? `<strong style="color: #991b1b;">${pwd}</strong>`
+        : `<span style="letter-spacing: 2px; color: #94a3b8;">••••••</span>`;
       return `
-        <div class="quick-fill-item" style="border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; cursor: pointer;" 
-             data-email="${user.email}" data-pwd="${pwd}" title="Click to auto-fill ${user.name}">
-          <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+        <div style="border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+          <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;">
             <div style="font-weight: 700; font-size: 12px; color: var(--text-main);">${user.name}</div>
-            <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">${user.email} • <strong>${pwd}</strong></div>
+            <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">${user.email} • ${pwdCell}</div>
           </div>
-          <button type="button" class="btn btn-secondary btn-sm btn-quick-autofill" data-email="${user.email}" data-pwd="${pwd}" style="font-size: 10.5px; padding: 2px 7px; margin-left: 6px; flex-shrink: 0;">Fill</button>
+          <button type="button" class="btn btn-secondary btn-sm btn-dir-copy" data-copy="${user.email} | ${pwd}" style="font-size: 10.5px; padding: 2px 8px; flex-shrink: 0;">Copy</button>
         </div>
       `;
     }
 
     if (leadList) {
-      leadList.innerHTML = (auth.leadership || []).map(u => createQuickFillRow(u, 'principal@123')).join('');
+      leadList.innerHTML = (auth.leadership || []).map(u => createAccountRow(u, 'principal@123')).join('');
     }
 
     const roster = auth.faculty_roster || [];
@@ -362,30 +365,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     const generalFaculty = roster.filter(f => !f.can_edit);
 
     if (authList) {
-      authList.innerHTML = authorizedFaculty.map(f => createQuickFillRow(f, 'coord@123')).join('');
+      authList.innerHTML = authorizedFaculty.length
+        ? authorizedFaculty.map(f => createAccountRow(f, 'coord@123')).join('')
+        : '<p class="text-muted" style="font-size: 11.5px; margin: 0;">No authoring coordinators appointed yet.</p>';
     }
 
     if (genList) {
-      genList.innerHTML = generalFaculty.map(f => createQuickFillRow(f, 'faculty@123')).join('');
+      genList.innerHTML = generalFaculty.length
+        ? generalFaculty.map(f => createAccountRow(f, 'faculty@123')).join('')
+        : '<p class="text-muted" style="font-size: 11.5px; margin: 0;">No registered viewers yet.</p>';
     }
 
-    // Attach click events to quick-fill items
-    document.querySelectorAll('.quick-fill-item, .btn-quick-autofill').forEach(el => {
-      el.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const email = el.getAttribute('data-email');
-        const pwd = el.getAttribute('data-pwd');
-        const emailInput = document.getElementById('loginInputEmail');
-        const pwdInput = document.getElementById('loginInputPassword');
-        if (emailInput && pwdInput) {
-          emailInput.value = email;
-          pwdInput.value = pwd;
-          switchAuthModalTab('paneSignIn');
-          // Auto-trigger submit for instant convenient testing
-          const form = document.getElementById('credentialLoginForm');
-          if (form) form.requestSubmit();
+    card.querySelectorAll('.btn-dir-copy').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(btn.getAttribute('data-copy') || '');
+          btn.textContent = 'Copied ✓';
+        } catch (e) {
+          btn.textContent = 'Manual copy';
         }
+        setTimeout(() => { btn.textContent = 'Copy'; }, 1600);
       });
+    });
+  }
+
+  const btnToggleDirPasswords = document.getElementById('btnToggleDirPasswords');
+  if (btnToggleDirPasswords) {
+    btnToggleDirPasswords.addEventListener('click', () => {
+      showAccountPasswords = !showAccountPasswords;
+      btnToggleDirPasswords.textContent = showAccountPasswords ? '🙈 Hide Passwords' : '👁️ Show Passwords';
+      renderAccountDirectory();
     });
   }
 
@@ -758,6 +767,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       localStorage.removeItem('academic_user');
     } catch (e) {}
+
+    // Re-mask the credential directory so the next admin sees masked values.
+    showAccountPasswords = false;
+    const dirPwdBtn = document.getElementById('btnToggleDirPasswords');
+    if (dirPwdBtn) dirPwdBtn.textContent = '👁️ Show Passwords';
 
     updateUserSessionUI();
     showAuthLandingView();
@@ -1923,7 +1937,11 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
     let totalCia = 0, totalSee = 0, totalMarks = 0;
 
     if (courses.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="15" class="text-center" style="padding: 30px; color: #64748b;">No matching courses found for ${currentDept} - Semester ${currentSem}.</td></tr>`;
+      const isFiltered = schemeSearchQuery !== '' || schemeTypeFilter !== 'ALL';
+      const emptyMsg = isFiltered
+        ? `No matching courses found for ${currentDept} - Semester ${getRomanSemester(currentSem)}. Clear the search or type filter to see all courses.`
+        : `No courses yet in ${currentDept} - Semester ${getRomanSemester(currentSem)}. Click “+ Add New Course” to start building this semester.`;
+      tbody.innerHTML = `<tr><td colspan="15" class="text-center" style="padding: 30px; color: #64748b;">${emptyMsg}</td></tr>`;
     } else {
       courses.forEach((c, index) => {
         const credits = Number(c.c || 0);
@@ -2025,7 +2043,7 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
     });
   }
 
-  function deleteCourse(code) {
+  async function deleteCourse(code) {
     if (!currentUser || !currentUser.can_edit) {
       openLoginModal('Permission denied: You must be an authorized coordinator or leadership member to delete courses.');
       return;
@@ -2033,10 +2051,51 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
     const dept = getActiveDept();
     if (dept && dept.schemes && dept.schemes[currentSem]) {
       dept.schemes[currentSem] = dept.schemes[currentSem].filter(c => c.code !== code);
+      // Remove the linked syllabus too, otherwise it lingers in the JSON and reappears
+      if (dept.syllabi && Object.prototype.hasOwnProperty.call(dept.syllabi, code)) {
+        delete dept.syllabi[code];
+      }
       renderSchemeTable();
       updateSyllabusCourseDropdown();
       renderHomeStats();
+      await saveStateToServer();
     }
+  }
+
+  // Wipe every course + syllabus for the active semester, so the app can start fresh
+  async function clearCurrentSemester() {
+    if (!currentUser || !currentUser.can_edit) {
+      openLoginModal('Permission denied: You must be an authorized coordinator or leadership member to clear a semester.');
+      return;
+    }
+    const dept = getActiveDept();
+    if (!dept) return;
+
+    const existing = (dept.schemes && dept.schemes[currentSem]) ? dept.schemes[currentSem] : [];
+    if (existing.length === 0) {
+      alert(`Semester ${getRomanSemester(currentSem)} is already empty.`);
+      return;
+    }
+
+    const label = `all ${existing.length} course(s) in ${currentDept} - Semester ${getRomanSemester(currentSem)}`;
+    if (!confirm(`Remove ${label}, including their syllabus content?\n\nThis is saved immediately and cannot be undone.`)) {
+      return;
+    }
+
+    existing.forEach(c => {
+      if (dept.syllabi && Object.prototype.hasOwnProperty.call(dept.syllabi, c.code)) {
+        delete dept.syllabi[c.code];
+      }
+    });
+
+    if (!dept.schemes) dept.schemes = {};
+    dept.schemes[currentSem] = [];
+    activeCourseCode = null;
+    renderSchemeTable();
+    updateSyllabusCourseDropdown();
+    renderHomeStats();
+    await saveStateToServer();
+    alert(`✅ Semester ${getRomanSemester(currentSem)} cleared. It is now empty.`);
   }
 
   // Course Modal
@@ -2076,10 +2135,15 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
     courseModal.classList.add('show');
   });
 
+  const btnClearSemester = document.getElementById('btnClearSemester');
+  if (btnClearSemester) {
+    btnClearSemester.addEventListener('click', clearCurrentSemester);
+  }
+
   btnModalClose.addEventListener('click', () => courseModal.classList.remove('show'));
   btnCancelModal.addEventListener('click', () => courseModal.classList.remove('show'));
 
-  courseForm.addEventListener('submit', (e) => {
+  courseForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const l = Number(document.getElementById('mL').value || 0);
     const t = Number(document.getElementById('mT').value || 0);
@@ -2122,6 +2186,7 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
     renderSchemeTable();
     updateSyllabusCourseDropdown();
     renderHomeStats();
+    await saveStateToServer();
   });
 
   // 8. Interface 2: Stepper / Wizard Logic
@@ -2224,49 +2289,34 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
         prerequisites: '',
         course_objectives: '',
         outcomes: [
-          { id: 'CO1', desc: `Explain fundamental concepts, architecture, and principles of ${course.title}.`, cl: '2', pl: '–' },
-          { id: 'CO2', desc: `Apply core algorithms and analytical techniques to solve engineering problems.`, cl: '3', pl: '3' },
-          { id: 'CO3', desc: `Analyze system models, operational performance, and implementation constraints.`, cl: '3', pl: '3' },
-          { id: 'CO4', desc: `Design and evaluate specialized components, protocols, and architectural workflows.`, cl: '3', pl: '3' },
-          { id: 'CO5', desc: `Develop solutions for real-world scenarios and assess performance tradeoffs.`, cl: '3', pl: '3' }
+          { id: 'CO1', desc: '', cl: '', pl: '' },
+          { id: 'CO2', desc: '', cl: '', pl: '' },
+          { id: 'CO3', desc: '', cl: '', pl: '' },
+          { id: 'CO4', desc: '', cl: '', pl: '' },
+          { id: 'CO5', desc: '', cl: '', pl: '' }
         ],
         co_assessment: [
-          { co: 'CO 1', cie1: 'M1', cie2: '', assignment: 'M1', see: 'M1' },
-          { co: 'CO 2', cie1: 'M2', cie2: '', assignment: 'M2', see: 'M2' },
-          { co: 'CO 3', cie1: 'M3', cie2: 'M3', assignment: 'M3', see: 'M3' },
-          { co: 'CO 4', cie1: '', cie2: 'M4', assignment: 'M4', see: 'M4' },
-          { co: 'CO 5', cie1: '', cie2: 'M5', assignment: 'M5', see: 'M5' }
+          { co: 'CO 1', cie1: '', cie2: '', assignment: '', see: '' },
+          { co: 'CO 2', cie1: '', cie2: '', assignment: '', see: '' },
+          { co: 'CO 3', cie1: '', cie2: '', assignment: '', see: '' },
+          { co: 'CO 4', cie1: '', cie2: '', assignment: '', see: '' },
+          { co: 'CO 5', cie1: '', cie2: '', assignment: '', see: '' }
         ],
         modules: [
-          { num: 'Module 1', co: 'CO 1', level: 'CL: 2 / PL: –', content: 'Foundations and Architectural Overview: Core definitions, historical perspective, operational scope, and system modeling.', textbook_ref: 'Text Book 1: Chapter 1 & 2.' },
-          { num: 'Module 2', co: 'CO 2', level: 'CL: 3 / PL: 3', content: 'Core Algorithms and Functional Elements: Structural mechanisms, data representation, and scheduling protocols.', textbook_ref: 'Text Book 1: Chapter 3 & 4.' },
-          { num: 'Module 3', co: 'CO 3', level: 'CL: 3 / PL: 3', content: 'Advanced Techniques and Subsystem Design: Memory, routing, synchronization, and algorithmic optimization.', textbook_ref: 'Text Book 1: Chapter 5 & 6.' },
-          { num: 'Module 4', co: 'CO 4', level: 'CL: 3 / PL: 3', content: 'Integration and Hardware/Software Interface: Interfacing standards, communication protocols, and validation frameworks.', textbook_ref: 'Text Book 2: Chapter 2 & 3.' },
-          { num: 'Module 5', co: 'CO 5', level: 'CL: 3 / PL: 3', content: 'Contemporary Paradigms and Case Studies: Modern architectural trends, benchmarking, security, and industrial case studies.', textbook_ref: 'Text Book 2: Chapter 7 & 8.' }
+          { num: 'Module 1', co: 'CO 1', level: '', content: '', textbook_ref: '' },
+          { num: 'Module 2', co: 'CO 2', level: '', content: '', textbook_ref: '' },
+          { num: 'Module 3', co: 'CO 3', level: '', content: '', textbook_ref: '' },
+          { num: 'Module 4', co: 'CO 4', level: '', content: '', textbook_ref: '' },
+          { num: 'Module 5', co: 'CO 5', level: '', content: '', textbook_ref: '' }
         ],
         practicals: {
           has_practical: course.p > 0 || course.type.includes('IPCC') || course.type.includes('PCCL'),
-          part_a: [
-            'Design and implement basic functional verification module.',
-            'Develop an end-to-end algorithmic program to demonstrate core module operations.',
-            'Simulate and evaluate system parameters under varying load conditions.'
-          ],
-          part_b: [
-            'Industry Case Study: Benchmark performance against standard datasets.',
-            'Open-ended Mini Project: Design an integrated solution for a practical scenario.'
-          ]
+          part_a: [],
+          part_b: []
         },
-        textbooks: [
-          `Author Name, '${course.title}: Concepts and Practice', 5th Edition, Pearson Education.`,
-          `Secondary Author, 'Advanced Computer Engineering Principles', McGraw Hill.`
-        ],
-        references: [
-          `Reference Author, 'Foundations of Modern System Design', Oxford University Press.`
-        ],
-        web_links: [
-          'https://nptel.ac.in/',
-          'https://vlabs.ac.in/'
-        ]
+        textbooks: [],
+        references: [],
+        web_links: []
       };
       if (!dept.syllabi) dept.syllabi = {};
       dept.syllabi[code] = syl;
@@ -2457,7 +2507,7 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
   document.getElementById('btnAddWebLink').addEventListener('click', () => addListItem('weblinkList', 'web-link', 'https://nptel.ac.in/...'));
 
   // Save Syllabus Action
-  function saveCurrentSyllabus(showSuccessAlert = true) {
+  async function saveCurrentSyllabus(showSuccessAlert = true) {
     if (!currentUser || !currentUser.can_edit) {
       openLoginModal('Permission denied: You must be an authorized coordinator or leadership member to save syllabus changes.');
       return;
@@ -2523,6 +2573,7 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
       if (i.value.trim()) webLinks.push(i.value.trim());
     });
 
+    if (!dept.syllabi) dept.syllabi = {};
     dept.syllabi[activeCourseCode] = {
       title: document.getElementById('lblSylTitle').textContent,
       semester: document.getElementById('lblSylSemester').textContent,
@@ -2551,17 +2602,18 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
     };
 
     renderHomeStats();
+    await saveStateToServer();
     if (showSuccessAlert) {
       alert(`✅ Syllabus for course ${activeCourseCode} has been saved successfully!`);
     }
   }
 
   document.getElementById('btnSaveSyllabus').addEventListener('click', () => saveCurrentSyllabus(true));
-  
+
   const btnFinish = document.getElementById('btnFinishSyllabus');
   if (btnFinish) {
-    btnFinish.addEventListener('click', () => {
-      saveCurrentSyllabus(false);
+    btnFinish.addEventListener('click', async () => {
+      await saveCurrentSyllabus(false);
       navigateToTab('tab-preview');
     });
   }

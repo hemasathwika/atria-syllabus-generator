@@ -43,7 +43,7 @@
               <label for="loginInputEmail" style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--text-main);">
                 Institutional Email (Format: <code>username_departmentname@atria.edu.in</code>):
               </label>
-              <input type="email" id="loginInputEmail" class="form-input" placeholder="e.g. veena_cse@atria.edu.in or deviprasad_cse@atria.edu.in" required style="width: 100%; font-size: 14px;">
+              <input type="email" id="loginInputEmail" class="form-input" placeholder="e.g. coordinator_cse@atria.edu.in" required style="width: 100%; font-size: 14px;">
               <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px;">Must follow official syntax: <code>username_dept@atria.edu.in</code></span>
             </div>
 
@@ -65,31 +65,9 @@
             </div>
           </form>
 
-          <!-- Credentials Directory / Quick Fill for Testing -->
-          <div style="border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden;">
-            <div id="toggleCredentialsDir" style="background: #eff6ff; padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 15px;">🔑</span>
-                <strong style="color: #1e40af; font-size: 12.5px;">Institutional Accounts & Test Passwords (Click to Auto-fill)</strong>
-              </div>
-              <span id="credentialsDirChevron" style="font-size: 12px; color: #1e40af; font-weight: 700;">▼ Click to Expand</span>
-            </div>
-
-            <div id="credentialsDirContent" style="display: none; padding: 14px; max-height: 280px; overflow-y: auto; background: #ffffff;">
-              <div style="margin-bottom: 12px;">
-                <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #1e40af; letter-spacing: 0.5px;">Institutional Leadership & Admin</span>
-                <div id="dirLeadershipList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;"></div>
-              </div>
-              <div style="margin-bottom: 12px;">
-                <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #047857; letter-spacing: 0.5px;">Authorized BoS Coordinators (4 Appointed Faculty)</span>
-                <div id="dirCoordinatorList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;"></div>
-              </div>
-              <div>
-                <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 0.5px;">General Faculty (View-Only)</span>
-                <div id="dirFacultyList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;"></div>
-              </div>
-            </div>
-          </div>
+          <p style="font-size: 11.5px; color: var(--text-muted); margin: 12px 0 0; text-align: center;">
+            Lost access or need an authoring account? Contact your Department BoS Coordinator or the Academic ERP Administrator.
+          </p>
         </div>
 
         <!-- PANE 2: SELF-REGISTRATION (VIEW-ONLY ACCESS) -->
@@ -167,7 +145,7 @@
               <label for="resetInputEmail" style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--text-main);">
                 Enter Your Registered Institutional Email (<code>username_dept@atria.edu.in</code>):
               </label>
-              <input type="email" id="resetInputEmail" class="form-input" placeholder="e.g. deviprasad_cse@atria.edu.in or suresh_cse@atria.edu.in" style="width: 100%; font-size: 14px;">
+              <input type="email" id="resetInputEmail" class="form-input" placeholder="e.g. coordinator_cse@atria.edu.in" style="width: 100%; font-size: 14px;">
             </div>
             <button type="button" class="btn btn-primary btn-block" id="btnSendResetOtp" style="padding: 9px 18px; font-weight: 700;">Send Verification OTP ➔</button>
           </div>
@@ -248,7 +226,7 @@
         <!-- Logged in state -->
         <div id="userLoggedInBlock" style="display: none; align-items: center; gap: 8px;">
           <span class="badge" id="userRoleBadge" style="background: #1e3a8a; color: #fff; font-size: 11.5px; font-weight: 700;">HOD</span>
-          <span id="userNameDisplay" style="font-weight: 600; font-size: 13px; color: var(--text-main);">Dr. Veena</span>
+          <span id="userNameDisplay" style="font-weight: 600; font-size: 13px; color: var(--text-main);">User</span>
           <button class="btn btn-secondary" id="btnManageAccess" style="padding: 5px 10px; font-size: 12px; display: none; background: #fff;">⚙️ Manage Faculty Access</button>
           <button class="btn btn-secondary" id="btnLogout" style="padding: 5px 10px; font-size: 12px; background: #fff;">Logout</button>
         </div>
@@ -490,6 +468,42 @@
         </div>
 
       </div>
+
+      <!-- 5. ADMIN-ONLY: Institutional Accounts Directory (never rendered on the login gate) -->
+      <div class="card" id="adminDirectoryCard" style="display: none; margin-top: 24px;">
+        <div class="card-header-flex" style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 20px;">🔑</span>
+            <div>
+              <h3 style="margin: 0; font-size: 15px;">Institutional Accounts & Test Passwords</h3>
+              <p class="text-muted" style="margin: 2px 0 0; font-size: 11.5px;">Restricted to signed-in administrators. Use these credentials to test other roles.</p>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="badge" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; font-size: 11px;">ADMIN ONLY</span>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnToggleDirPasswords" style="font-size: 11.5px; padding: 4px 10px;">👁️ Show Passwords</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #1e40af; letter-spacing: 0.5px;">Institutional Leadership & Admin</div>
+          <div id="dirLeadershipList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px; margin-top: 8px;"></div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #047857; letter-spacing: 0.5px;">Authorized BoS Coordinators</div>
+          <div id="dirCoordinatorList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px; margin-top: 8px;"></div>
+        </div>
+
+        <div>
+          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 0.5px;">General Faculty / Registered Viewers</div>
+          <div id="dirFacultyList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px; margin-top: 8px;"></div>
+        </div>
+
+        <p style="font-size: 11px; color: var(--text-muted); margin: 14px 0 0;">
+          ⚠️ Stored in plain text inside <code>data/default_data.json</code>. Replace with a real password hash before deploying this portal beyond local use.
+        </p>
+      </div>
     </section>
 
     <!-- ========================================== -->
@@ -532,6 +546,7 @@
             </select>
           </div>
           <button class="btn btn-primary" id="btnAddCourse">+ Add New Course</button>
+          <button class="btn btn-secondary btn-danger-outline" id="btnClearSemester" title="Remove every course (and its syllabus) in this semester">🗑️ Clear Semester</button>
           <button class="btn btn-secondary" id="btnExportSchemeQuick" title="View & Print Scheme Only">🖨️ Print Scheme</button>
           <button class="btn btn-secondary" id="btnDownloadSchemeDocxQuick" title="Download Scheme as Word (.docx)">📄 Scheme (.docx)</button>
         </div>
