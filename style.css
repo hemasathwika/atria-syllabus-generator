@@ -1270,3 +1270,45 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   Full-Page Authentication Landing Screen (First-Time User Gate)
+   ========================================================================== */
+.auth-landing-screen {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #0f766e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 16px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.auth-landing-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+  max-width: 660px;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  animation: fadeInAuth 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInAuth {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.auth-landing-header {
+  padding: 26px 28px 18px 28px;
+  text-align: center;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border);
+}
+
+.auth-landing-body {
+  padding: 24px 28px;
+}

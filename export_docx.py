@@ -39,37 +39,41 @@ def generate_scheme_docx(dept_data, output_path="Generated_CSE_2024_SCHEME.docx"
     section.left_margin = Inches(0.5)
     section.right_margin = Inches(0.5)
 
-    # Header with official Atria Logo & Institution Title
-    header_table = doc.add_table(rows=1, cols=2)
+    # Header with official Atria Logo on left & Centered Headings
+    header_table = doc.add_table(rows=1, cols=3)
     header_table.alignment = WD_TABLE_ALIGNMENT.CENTER
     header_table.autofit = False
     
     # Left: Atria Logo
     c_left = header_table.rows[0].cells[0]
-    c_left.width = Inches(3.2)
+    c_left.width = Inches(2.8)
     logo_path = os.path.join(os.path.dirname(__file__), "assets", "atria_logo.png")
     if os.path.exists(logo_path):
         p_l = c_left.paragraphs[0]
         p_l.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        p_l.add_run().add_picture(logo_path, width=Inches(2.8))
+        p_l.add_run().add_picture(logo_path, width=Inches(2.5))
     
-    # Right: Institutional Title
-    c_right = header_table.rows[0].cells[1]
-    c_right.width = Inches(7.4)
-    p_r = c_right.paragraphs[0]
-    p_r.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    r1 = p_r.add_run("ATRIA INSTITUTE OF TECHNOLOGY\n")
+    # Center: Institutional Title
+    c_mid = header_table.rows[0].cells[1]
+    c_mid.width = Inches(5.0)
+    p_m = c_mid.paragraphs[0]
+    p_m.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    r1 = p_m.add_run("ATRIA INSTITUTE OF TECHNOLOGY\n")
     r1.bold = True
     r1.font.size = Pt(13)
-    r1_sub = p_r.add_run("(An Autonomous Institution Affiliated to VTU, Belagavi | Approved by AICTE, New Delhi)\n")
+    r1_sub = p_m.add_run("(An Autonomous Institution Affiliated to VTU, Belagavi | Approved by AICTE, New Delhi)\n")
     r1_sub.font.size = Pt(8.5)
-    r2 = p_r.add_run(f"DEPARTMENT OF {dept_data['name'].upper()}\n")
+    r2 = p_m.add_run(f"DEPARTMENT OF {dept_data['name'].upper()}\n")
     r2.bold = True
     r2.font.size = Pt(11)
-    r3 = p_r.add_run("TEACHING AND EXAMINATION SCHEME (2024 REGULATION)")
+    r3 = p_m.add_run("TEACHING AND EXAMINATION SCHEME (2024 REGULATION)")
     r3.bold = True
     r3.font.size = Pt(9.5)
     r3.font.color.rgb = RGBColor(60, 60, 60)
+
+    # Right: Empty Spacer (balances center alignment)
+    c_right = header_table.rows[0].cells[2]
+    c_right.width = Inches(2.8)
 
     for sem_num, courses in dept_data.get('schemes', {}).items():
         doc.add_paragraph()
@@ -206,31 +210,37 @@ def generate_syllabus_docx(dept_data, output_path="Generated_CSE_SYLLABUS.docx",
         items = [(code, syl) for code, syl in items if code == filter_code]
 
     for code, syl in items:
-        # Header with official Atria Logo & Institution Title
-        syl_hdr = doc.add_table(rows=1, cols=2)
+        # Header with official Atria Logo on left & Centered Headings
+        syl_hdr = doc.add_table(rows=1, cols=3)
         syl_hdr.alignment = WD_TABLE_ALIGNMENT.CENTER
         syl_hdr.autofit = False
 
+        # Left: Atria Logo
         c_l = syl_hdr.rows[0].cells[0]
-        c_l.width = Inches(2.6)
+        c_l.width = Inches(2.0)
         logo_path = os.path.join(os.path.dirname(__file__), "assets", "atria_logo.png")
         if os.path.exists(logo_path):
             p_l = c_l.paragraphs[0]
             p_l.alignment = WD_ALIGN_PARAGRAPH.LEFT
-            p_l.add_run().add_picture(logo_path, width=Inches(2.2))
+            p_l.add_run().add_picture(logo_path, width=Inches(1.8))
 
-        c_r = syl_hdr.rows[0].cells[1]
-        c_r.width = Inches(4.6)
-        p_r = c_r.paragraphs[0]
-        p_r.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        r1 = p_r.add_run("ATRIA INSTITUTE OF TECHNOLOGY (AUTONOMOUS)\n")
+        # Center: Institutional Title
+        c_m = syl_hdr.rows[0].cells[1]
+        c_m.width = Inches(3.2)
+        p_m = c_m.paragraphs[0]
+        p_m.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r1 = p_m.add_run("ATRIA INSTITUTE OF TECHNOLOGY (AUTONOMOUS)\n")
         r1.bold = True
         r1.font.size = Pt(11)
-        r1_sub = p_r.add_run("(Affiliated to VTU, Belagavi | Approved by AICTE, New Delhi)\n")
+        r1_sub = p_m.add_run("(Affiliated to VTU, Belagavi | Approved by AICTE, New Delhi)\n")
         r1_sub.font.size = Pt(8)
-        r2 = p_r.add_run(f"DEPARTMENT OF {dept_data['name'].upper()}\n")
+        r2 = p_m.add_run(f"DEPARTMENT OF {dept_data['name'].upper()}\n")
         r2.bold = True
         r2.font.size = Pt(9.5)
+
+        # Right: Empty Spacer (balances center alignment)
+        c_r = syl_hdr.rows[0].cells[2]
+        c_r.width = Inches(2.0)
 
         doc.add_paragraph() # Spacing
 

@@ -174,6 +174,39 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnLoginModalOpen = document.getElementById('btnLoginModalOpen');
   const loginModal = document.getElementById('loginModal');
   const accessManagementModal = document.getElementById('accessManagementModal');
+  const authLandingView = document.getElementById('authLandingView');
+  const appMainView = document.getElementById('appMainView');
+  const btnContinueAsGuest = document.getElementById('btnContinueAsGuest');
+
+  function showAuthLandingView(message = '') {
+    if (authLandingView) authLandingView.style.display = 'flex';
+    if (appMainView) appMainView.style.display = 'none';
+    renderLoginLists();
+    if (message) {
+      const loginAlertBox = document.getElementById('loginAlertBox');
+      if (loginAlertBox) {
+        loginAlertBox.style.display = 'block';
+        loginAlertBox.textContent = message;
+      }
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function showAppMainView() {
+    if (authLandingView) authLandingView.style.display = 'none';
+    if (appMainView) appMainView.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function openLoginModal(message = '') {
+    showAuthLandingView(message);
+  }
+
+  function closeLoginModal() {
+    if (currentUser && currentUser.id !== 'GUEST') {
+      showAppMainView();
+    }
+  }
 
   function updateUserSessionUI() {
     renderDeptSelector();
@@ -700,11 +733,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       currentDept = userDept;
     }
 
-    closeLoginModal();
+    showAppMainView();
     updateUserSessionUI();
     renderSchemeTable();
     updateSyllabusCourseDropdown();
     renderHomeStats();
+    navigateToTab('tab-home');
 
     const scopeNotice = userDept && !isCrossDeptUser(currentUser)
       ? `\n🔒 Department Scope: Locked strictly to ${userDept} department.`
@@ -726,13 +760,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (e) {}
 
     updateUserSessionUI();
-    renderSchemeTable();
-    updateSyllabusCourseDropdown();
-    renderHomeStats();
-    alert('Logged out. System returned to View-Only mode.');
+    showAuthLandingView();
   }
 
-  if (btnLoginModalOpen) btnLoginModalOpen.onclick = () => openLoginModal();
+  if (btnLoginModalOpen) btnLoginModalOpen.onclick = () => showAuthLandingView();
   if (btnLogout) btnLogout.onclick = logoutUser;
 
   const btnLoginClose = document.getElementById('btnLoginModalClose');
@@ -743,6 +774,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnContinueGuest.onclick = () => {
       logoutUser();
       closeLoginModal();
+    };
+  }
+
+  if (btnContinueAsGuest) {
+    btnContinueAsGuest.onclick = () => {
+      currentUser = {
+        id: 'GUEST',
+        name: 'Guest / Student Viewer',
+        role: 'VIEWER',
+        can_edit: false,
+        can_manage_faculty: false
+      };
+      showAppMainView();
+      updateUserSessionUI();
+      renderSchemeTable();
+      updateSyllabusCourseDropdown();
+      renderHomeStats();
+      navigateToTab('tab-home');
     };
   }
 
@@ -1508,7 +1557,7 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
 
   // 2. Department Selector is managed by renderDeptSelector() with strict role-based scoping (initialized above)
 
-  // 3. Tab Switching & Browser History Routing
+  // 3. Tab & Stepper History Routing (Comprehensive SPA Navigation)
   const TAB_HASH_MAP = {
     'tab-home': 'home',
     'tab-scheme': 'scheme',
@@ -1523,6 +1572,65 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
     'syllabus': 'tab-syllabus',
     'preview': 'tab-preview'
   };
+
+  const STEP_HASH_MAP = {
+    'step-overview': 'step-1-overview',
+    'step-cos': 'step-2-cos',
+    'step-assessment': 'step-3-assessment',
+    'step-modules': 'step-4-modules',
+    'step-practicals': 'step-5-practicals',
+    'step-books': 'step-6-books'
+  };
+
+  const HASH_STEP_MAP = {
+    'step-1-overview': 'step-overview',
+    'step-overview': 'step-overview',
+    'overview': 'step-overview',
+    'step-2-cos': 'step-cos',
+    'step-cos': 'step-cos',
+    'cos': 'step-cos',
+    'step-3-assessment': 'step-assessment',
+    'step-assessment': 'step-assessment',
+    'assessment': 'step-assessment',
+    'step-4-modules': 'step-modules',
+    'step-modules': 'step-modules',
+    'modules': 'step-modules',
+    'step-5-practicals': 'step-practicals',
+    'step-practicals': 'step-practicals',
+    'practicals': 'step-practicals',
+    'step-6-books': 'step-books',
+    'step-books': 'step-books',
+    'books': 'step-books'
+  };
+
+  function showStep(stepId, pushHistory = true) {
+    if (!stepId || !document.getElementById(stepId)) {
+      stepId = 'step-overview';
+    }
+
+    const stepButtons = document.querySelectorAll('.stepper-nav .step-btn');
+    const wizardSteps = document.querySelectorAll('.wizard-step');
+
+    stepButtons.forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-step') === stepId);
+    });
+    wizardSteps.forEach(s => {
+      s.classList.toggle('active', s.id === stepId);
+    });
+
+    try {
+      sessionStorage.setItem('academic_active_step', stepId);
+    } catch (e) {}
+
+    // Push history state so browser Back/Forward stays inside Syllabus Builder and steps back through previous tabs!
+    if (pushHistory) {
+      const stepSlug = STEP_HASH_MAP[stepId] || 'step-1-overview';
+      const targetHash = `#syllabus/${stepSlug}`;
+      if (window.location.hash !== targetHash) {
+        history.pushState({ tabId: 'tab-syllabus', stepId: stepId }, '', targetHash);
+      }
+    }
+  }
 
   window.navigateToTab = function(tabId, pushHistory = true) {
     if (!tabId || !document.getElementById(tabId)) {
@@ -1539,26 +1647,50 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
     const activePane = document.getElementById(tabId);
     if (activePane) activePane.classList.add('active');
 
-    // Save to sessionStorage for page reload persistence
     try {
       sessionStorage.setItem('academic_active_tab', tabId);
     } catch (e) {}
 
-    // Update browser URL hash and History API state so Back / Forward buttons work smoothly
-    const hash = TAB_HASH_MAP[tabId] || 'home';
-    const targetHash = '#' + hash;
-    if (pushHistory) {
-      if (window.location.hash !== targetHash) {
-        history.pushState({ tabId: tabId }, '', targetHash);
-      }
-    }
-
     if (tabId === 'tab-syllabus') {
       updateSyllabusCourseDropdown();
-    } else if (tabId === 'tab-preview') {
-      renderPrintPreview();
-    } else if (tabId === 'tab-home') {
-      renderHomeStats();
+      let activeStep = 'step-overview';
+      const rawHash = (window.location.hash || '').replace('#', '').toLowerCase();
+      if (rawHash.startsWith('syllabus/')) {
+        const stepPart = rawHash.replace('syllabus/', '');
+        if (HASH_STEP_MAP[stepPart]) {
+          activeStep = HASH_STEP_MAP[stepPart];
+        }
+      } else {
+        try {
+          const savedStep = sessionStorage.getItem('academic_active_step');
+          if (savedStep && document.getElementById(savedStep)) {
+            activeStep = savedStep;
+          }
+        } catch (e) {}
+      }
+      showStep(activeStep, false);
+
+      if (pushHistory) {
+        const stepSlug = STEP_HASH_MAP[activeStep] || 'step-1-overview';
+        const targetHash = `#syllabus/${stepSlug}`;
+        if (window.location.hash !== targetHash) {
+          history.pushState({ tabId: 'tab-syllabus', stepId: activeStep }, '', targetHash);
+        }
+      }
+    } else {
+      const hash = TAB_HASH_MAP[tabId] || 'home';
+      const targetHash = '#' + hash;
+      if (pushHistory) {
+        if (window.location.hash !== targetHash) {
+          history.pushState({ tabId: tabId }, '', targetHash);
+        }
+      }
+
+      if (tabId === 'tab-preview') {
+        renderPrintPreview();
+      } else if (tabId === 'tab-home') {
+        renderHomeStats();
+      }
     }
   };
 
@@ -1570,22 +1702,46 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
 
   // Handle Browser Back / Forward buttons (popstate & hashchange)
   window.addEventListener('popstate', (event) => {
+    // If popstate event has stepId, stay in Syllabus Builder and navigate to that step!
+    if (event.state && event.state.tabId === 'tab-syllabus') {
+      navigateToTab('tab-syllabus', false);
+      if (event.state.stepId) {
+        showStep(event.state.stepId, false);
+      }
+      return;
+    }
+
+    const rawHash = (window.location.hash || '').replace('#', '').toLowerCase();
+    if (rawHash.startsWith('syllabus/')) {
+      const stepPart = rawHash.replace('syllabus/', '');
+      navigateToTab('tab-syllabus', false);
+      const targetStep = HASH_STEP_MAP[stepPart] || 'step-overview';
+      showStep(targetStep, false);
+      return;
+    }
+
     let targetTab = 'tab-home';
     if (event.state && event.state.tabId && document.getElementById(event.state.tabId)) {
       targetTab = event.state.tabId;
     } else {
-      const currentHash = (window.location.hash || '').replace('#', '').toLowerCase();
-      if (HASH_TAB_MAP[currentHash]) {
-        targetTab = HASH_TAB_MAP[currentHash];
+      if (HASH_TAB_MAP[rawHash]) {
+        targetTab = HASH_TAB_MAP[rawHash];
       }
     }
     navigateToTab(targetTab, false);
   });
 
   window.addEventListener('hashchange', () => {
-    const currentHash = (window.location.hash || '').replace('#', '').toLowerCase();
-    if (HASH_TAB_MAP[currentHash]) {
-      navigateToTab(HASH_TAB_MAP[currentHash], false);
+    const rawHash = (window.location.hash || '').replace('#', '').toLowerCase();
+    if (rawHash.startsWith('syllabus/')) {
+      const stepPart = rawHash.replace('syllabus/', '');
+      navigateToTab('tab-syllabus', false);
+      const targetStep = HASH_STEP_MAP[stepPart] || 'step-overview';
+      showStep(targetStep, false);
+      return;
+    }
+    if (HASH_TAB_MAP[rawHash]) {
+      navigateToTab(HASH_TAB_MAP[rawHash], false);
     }
   });
 
@@ -1593,7 +1749,9 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
     const rawHash = (window.location.hash || '').replace('#', '').toLowerCase();
     let initialTab = 'tab-home';
 
-    if (HASH_TAB_MAP[rawHash]) {
+    if (rawHash.startsWith('syllabus/')) {
+      initialTab = 'tab-syllabus';
+    } else if (HASH_TAB_MAP[rawHash]) {
       initialTab = HASH_TAB_MAP[rawHash];
     } else {
       try {
@@ -1604,9 +1762,17 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
       } catch (e) {}
     }
 
-    const hash = TAB_HASH_MAP[initialTab] || 'home';
-    history.replaceState({ tabId: initialTab }, '', '#' + hash);
-    navigateToTab(initialTab, false);
+    if (initialTab === 'tab-syllabus') {
+      const stepPart = rawHash.replace('syllabus/', '');
+      const activeStep = HASH_STEP_MAP[stepPart] || 'step-overview';
+      history.replaceState({ tabId: 'tab-syllabus', stepId: activeStep }, '', '#syllabus/' + (STEP_HASH_MAP[activeStep] || 'step-1-overview'));
+      navigateToTab('tab-syllabus', false);
+      showStep(activeStep, false);
+    } else {
+      const hash = TAB_HASH_MAP[initialTab] || 'home';
+      history.replaceState({ tabId: initialTab }, '', '#' + hash);
+      navigateToTab(initialTab, false);
+    }
   }
 
   // 4. Home Dashboard Render
@@ -1690,132 +1856,6 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
     if (metricSem) metricSem.textContent = '8 Semesters (I–VIII)';
     if (metricCourses) metricCourses.textContent = `${totalCoursesCount} Active Courses`;
     if (metricFac) metricFac.textContent = `${authCount} / ${roster.length} Authorized`;
-
-    // 3. Populate Semester Curriculum Matrix Table (All 8 Semesters)
-    const semTbody = document.getElementById('homeSemesterTableBody');
-    if (semTbody) {
-      const cycleNames = {
-        '1': 'First Year Physics/Chemistry Cycle',
-        '2': 'First Year Physics/Chemistry Cycle',
-        '3': 'Second Year Core Branch Foundation',
-        '4': 'Second Year Core Branch Foundation',
-        '5': 'Third Year Professional Core & Electives',
-        '6': 'Third Year Professional Core & Electives',
-        '7': 'Final Year Advanced Electives & Capstone',
-        '8': 'Final Year Project Work & Internship'
-      };
-
-      let tableHtml = '';
-      for (let s = 1; s <= 8; s++) {
-        const sStr = String(s);
-        const sCourses = (dept.schemes && dept.schemes[sStr]) || [];
-        const hasCourses = sCourses.length > 0;
-        
-        let sumCredits = 0;
-        let sumHours = 0;
-        sCourses.forEach(c => {
-          sumCredits += Number(c.c || 0);
-          sumHours += Number(c.tot || 0);
-        });
-
-        // Syllabus status
-        let sylStatusHtml = '';
-        if (hasCourses) {
-          const sylCount = sCourses.filter(c => dept.syllabi && dept.syllabi[c.code]).length;
-          if (sylCount === sCourses.length) {
-            sylStatusHtml = `<span class="badge badge-active" style="font-size: 11px;">✅ ${sylCount}/${sCourses.length} Syllabi Ready</span>`;
-          } else if (sylCount > 0) {
-            sylStatusHtml = `<span class="badge" style="background: #fef3c7; color: #b45309; font-size: 11px;">🔄 ${sylCount}/${sCourses.length} Drafted</span>`;
-          } else {
-            sylStatusHtml = `<span class="badge" style="background: #f1f5f9; color: #64748b; font-size: 11px;">📝 Scheme Only</span>`;
-          }
-        } else {
-          sylStatusHtml = `<span class="badge" style="background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; font-size: 11px;">Cycle In Setup</span>`;
-        }
-
-        tableHtml += `
-          <tr>
-            <td style="font-weight: 700; color: var(--primary);">Sem ${getRomanSemester(sStr)}</td>
-            <td style="font-size: 12px; color: var(--text-muted);">${cycleNames[sStr]}</td>
-            <td style="text-align: center; font-weight: 600;">${hasCourses ? `${sCourses.length} Courses` : '<span style="color: #94a3b8;">–</span>'}</td>
-            <td style="text-align: center; font-weight: 700; color: var(--text-main);">${hasCourses ? `${sumCredits} Cr` : '<span style="color: #94a3b8;">–</span>'}</td>
-            <td style="text-align: center; font-size: 12px; color: var(--text-muted);">${hasCourses ? `${sumHours} hrs` : '<span style="color: #94a3b8;">–</span>'}</td>
-            <td>${sylStatusHtml}</td>
-            <td style="text-align: center; white-space: nowrap;">
-              <button class="btn btn-sm btn-outline btn-home-jump-scheme" data-sem="${sStr}" style="padding: 3px 8px; font-size: 11px;" title="Open Scheme for Semester ${sStr}">📋 Scheme</button>
-              <button class="btn btn-sm btn-outline btn-home-jump-syl" data-sem="${sStr}" style="padding: 3px 8px; font-size: 11px; margin-left: 4px;" title="Open Syllabus for Semester ${sStr}">📖 Syllabi</button>
-            </td>
-          </tr>
-        `;
-      }
-      semTbody.innerHTML = tableHtml;
-
-      // Attach jump events
-      semTbody.querySelectorAll('.btn-home-jump-scheme').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const sem = btn.getAttribute('data-sem');
-          currentSem = sem;
-          if (semSelect) semSelect.value = sem;
-          renderSchemeTable();
-          navigateToTab('tab-scheme');
-        });
-      });
-
-      semTbody.querySelectorAll('.btn-home-jump-syl').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const sem = btn.getAttribute('data-sem');
-          currentSem = sem;
-          if (semSelect) semSelect.value = sem;
-          updateSyllabusCourseDropdown();
-          navigateToTab('tab-syllabus');
-        });
-      });
-    }
-
-    // 4. Populate Department Faculty Governance Roster Cards
-    const facultyGrid = document.getElementById('homeFacultyGrid');
-    if (facultyGrid) {
-      const authorizedCoordinators = roster.filter(f => f.can_edit);
-      const generalFaculty = roster.filter(f => !f.can_edit);
-
-      facultyGrid.innerHTML = `
-        <!-- Card 1: HOD -->
-        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-            <strong style="color: #4338ca; font-size: 13.5px;">Dr. Veena</strong>
-            <span class="badge" style="background: #4338ca; color: #fff;">HEAD OF DEPT (HOD)</span>
-          </div>
-          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">Professor & HOD, Computer Science & Engineering</div>
-          <div style="font-size: 11.5px; color: var(--text-main); font-family: monospace;">hod.cse@college.edu</div>
-          <div style="margin-top: 8px; font-size: 11px; color: #15803d; font-weight: 700;">✓ Full Leadership & Delegation Rights</div>
-        </div>
-
-        <!-- Card 2: BoS Coordinators -->
-        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px;">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-            <strong style="color: #047857; font-size: 13.5px;">Authorized BoS Coordinators</strong>
-            <span class="badge" style="background: #047857; color: #fff;">4 APPOINTED</span>
-          </div>
-          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">Faculty authorized to edit curriculum & syllabi:</div>
-          <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: var(--text-main); line-height: 1.5;">
-            ${authorizedCoordinators.map(c => `<li><strong>${c.name}</strong> (${c.designation})</li>`).join('')}
-          </ul>
-        </div>
-
-        <!-- Card 3: General Faculty -->
-        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-            <strong style="color: #475569; font-size: 13.5px;">Teaching Faculty</strong>
-            <span class="badge" style="background: #e2e8f0; color: #475569;">${generalFaculty.length} VIEW-ONLY</span>
-          </div>
-          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">Department teaching members with document access:</div>
-          <div style="font-size: 12px; color: var(--text-main); line-height: 1.4;">
-            ${generalFaculty.slice(0, 4).map(f => f.name).join(', ')}, and ${generalFaculty.length - 4} others.
-          </div>
-          <div style="margin-top: 8px; font-size: 11px; color: #64748b;">Can search, view, and export documents.</div>
-        </div>
-      `;
-    }
   }
 
   // 5. Semester Selector
@@ -2085,31 +2125,19 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
   });
 
   // 8. Interface 2: Stepper / Wizard Logic
-  const stepButtons = document.querySelectorAll('.stepper-nav .step-btn');
-  const wizardSteps = document.querySelectorAll('.wizard-step');
-
-  function showStep(stepId) {
-    stepButtons.forEach(b => {
-      b.classList.toggle('active', b.getAttribute('data-step') === stepId);
-    });
-    wizardSteps.forEach(s => {
-      s.classList.toggle('active', s.id === stepId);
-    });
-  }
-
-  stepButtons.forEach(btn => {
+  document.querySelectorAll('.stepper-nav .step-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      showStep(btn.getAttribute('data-step'));
+      showStep(btn.getAttribute('data-step'), true);
     });
   });
 
   window.nextWizardStep = function(targetStepId) {
-    showStep(targetStepId);
+    showStep(targetStepId, true);
     window.scrollTo({ top: 180, behavior: 'smooth' });
   };
 
   window.prevWizardStep = function(targetStepId) {
-    showStep(targetStepId);
+    showStep(targetStepId, true);
     window.scrollTo({ top: 180, behavior: 'smooth' });
   };
 
@@ -2823,10 +2851,15 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
       let html = `
         <div class="syllabus-doc-box" style="margin-bottom: 30px;">
           <!-- Official Atria Syllabus Document Header -->
-          <div style="display: flex; align-items: center; justify-content: center; flex-direction: column; margin-bottom: 14px; border-bottom: 2px solid #000; padding-bottom: 10px; text-align: center;">
-            <img src="assets/atria_logo.png" alt="Atria Institute of Technology" style="height: 52px; max-width: 280px; object-fit: contain; margin-bottom: 4px;">
-            <div style="font-size: 11px; font-weight: 600;">(An Autonomous Institution Affiliated to VTU, Belagavi | Approved by AICTE, New Delhi)</div>
-            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; margin-top: 2px;">Department of Computer Science & Engineering</div>
+          <div style="position: relative; min-height: 56px; margin-bottom: 14px; border-bottom: 2px solid #000; padding-bottom: 10px;">
+            <div style="position: absolute; left: 0; top: 50%; transform: translateY(-50%);">
+              <img src="assets/atria_logo.png" alt="Atria Institute of Technology" style="height: 50px; max-width: 210px; object-fit: contain;">
+            </div>
+            <div style="text-align: center; padding: 0 40px;">
+              <div style="font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Atria Institute of Technology</div>
+              <div style="font-size: 10.5px; font-weight: 600;">(An Autonomous Institution Affiliated to VTU, Belagavi | Approved by AICTE, New Delhi)</div>
+              <div style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; margin-top: 2px;">Department of Computer Science & Engineering</div>
+            </div>
           </div>
           <table style="border: 2px solid #000; width: 100%; border-collapse: collapse; margin-bottom: 16px;">
             <tr>
@@ -3019,5 +3052,22 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
   updateSyllabusCourseDropdown();
   renderHomeStats();
   updateUserSessionUI();
-  initAppRouting();
+
+  // First-Time User Gate:
+  // If user has an existing session in localStorage, enter the portal directly.
+  // If opening for the first time or logged out, present the Login & Sign Up landing page!
+  const savedUser = localStorage.getItem('academic_user');
+  if (savedUser) {
+    try {
+      currentUser = JSON.parse(savedUser);
+      const userDept = getUserAssignedDept(currentUser);
+      if (!isCrossDeptUser(currentUser) && userDept) {
+        currentDept = userDept;
+      }
+    } catch (e) {}
+    showAppMainView();
+    initAppRouting();
+  } else {
+    showAuthLandingView();
+  }
 });
