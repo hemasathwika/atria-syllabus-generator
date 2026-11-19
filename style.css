@@ -75,11 +75,13 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: var(--bg);
+  background: linear-gradient(rgba(248, 250, 252, 0.93), rgba(241, 245, 249, 0.96)),
+              url('assets/atria_campus_bg.jpg') center top / cover no-repeat fixed;
   color: var(--text-main);
   line-height: 1.5;
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
 /* Layout Container */
@@ -91,7 +93,9 @@ body {
 
 /* Navbar */
 .navbar {
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
   border-top: 3px solid var(--primary);
   box-shadow: var(--shadow-sm);
@@ -191,7 +195,9 @@ body {
 
 /* Navigation Tabs */
 .tab-bar {
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
   padding: 0 24px;
@@ -263,18 +269,20 @@ body {
 
 /* Executive Welcome Banner */
 .welcome-banner {
-  background: linear-gradient(135deg, #042f2e 0%, #0f766e 40%, #0369a1 100%);
+  background: linear-gradient(105deg, rgba(4, 47, 46, 0.92) 0%, rgba(15, 118, 110, 0.88) 50%, rgba(3, 105, 161, 0.82) 100%),
+              url('assets/atria_campus_bg.jpg') center 25% / cover no-repeat;
   color: var(--text-white);
   border-radius: var(--radius-lg);
-  padding: 22px 28px;
+  padding: 24px 30px;
   margin-bottom: 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 20px;
-  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 25px -5px rgba(15, 118, 110, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
 }
 
 .welcome-dept-tag {
@@ -1277,7 +1285,8 @@ textarea:focus {
 .auth-landing-screen {
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #0f766e 100%);
+  background: linear-gradient(rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.88)),
+              url('assets/atria_campus_bg.jpg') center center / cover no-repeat fixed;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1287,13 +1296,15 @@ textarea:focus {
 }
 
 .auth-landing-card {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: var(--radius-lg);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.55);
   max-width: 660px;
   width: 100%;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   animation: fadeInAuth 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
