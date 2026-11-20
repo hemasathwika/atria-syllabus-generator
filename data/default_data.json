@@ -328,6 +328,17 @@
         "password": "coord@123",
         "can_edit": true,
         "role": "Authorized Coordinator"
+      },
+      {
+        "id": "REG-7157",
+        "name": "Neha J",
+        "designation": "Faculty (General)",
+        "email": "neha_ece@atria.edu.in",
+        "dept": "ECE",
+        "password": "Neha@123",
+        "can_edit": false,
+        "can_manage_faculty": false,
+        "role": "Faculty (General) (View-Only)"
       }
     ]
   }
