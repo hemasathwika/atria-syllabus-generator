@@ -562,8 +562,16 @@ def generate_syllabus_docx(dept_data, output_path="Generated_CSE_SYLLABUS.docx",
     print(f"Generated syllabus document: {output_path}")
 
 def main():
-    with open("data/default_data.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
+    # Prefer the database; fall back to the JSON mirror if it is unavailable.
+    data = None
+    try:
+        import db as store
+        data = store.load_state()
+    except Exception as exc:
+        print(f"Database unavailable ({exc}); falling back to data/default_data.json")
+    if data is None:
+        with open("data/default_data.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
     
     cse_data = next((d for d in data.get("departments", []) if d.get("code") == "CSE"), None)
     if cse_data:

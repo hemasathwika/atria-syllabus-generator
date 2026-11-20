@@ -16,7 +16,14 @@ import traceback
 import urllib.parse
 import importlib
 
+import db
+
 PORT = 8000
+
+
+def fresh_db():
+    """Reload db.py too, so schema/persistence edits apply without a restart."""
+    return importlib.reload(db)
 
 
 def fresh_exporter():
@@ -51,10 +58,15 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 body = self.rfile.read(content_length).decode('utf-8')
                 data = json.loads(body)
                 
-                # Save to data/default_data.json
-                os.makedirs("data", exist_ok=True)
-                with open("data/default_data.json", "w", encoding="utf-8") as f:
-                    json.dump(data, f, indent=2, ensure_ascii=False)
+                # Write to SQLite (authoritative), then keep the JSON mirror
+                # in sync so the file can still be diffed, backed up or exported.
+                database = fresh_db()
+                conn = database.ensure_ready()
+                skipped = database.save_state(data, conn=conn)
+                database.export_json(conn, database.JSON_PATH)
+                conn.close()
+                if skipped:
+                    print("Skipped syllabi without a matching course:", ", ".join(skipped))
                 
                 # Regenerate both docx files using export_docx
                 try:
@@ -77,6 +89,27 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
 
     def do_GET(self):
+        # Single source of truth: SQLite. The frontend receives the same JSON
+        # shape as before, assembled from the normalised tables.
+        if self.path.split('?')[0] == '/api/state':
+            try:
+                state = fresh_db().load_state()
+                payload = json.dumps(state, ensure_ascii=False).encode('utf-8')
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.send_header('Content-Length', str(len(payload)))
+                self.end_headers()
+                self.wfile.write(payload)
+            except Exception as e:
+                traceback.print_exc()
+                body = json.dumps({"status": "error", "message": str(e)}).encode('utf-8')
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Content-Length', str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+            return
+
         if self.path.startswith('/api/download/scheme-docx'):
             file_path = "Generated_CSE_2024_SCHEME.docx"
             # Always rebuild from the live data and the current exporter code.
@@ -148,6 +181,17 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 def main():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     url = f"http://localhost:{PORT}/index.html"
+
+    # Create + seed the database on first run so the app works from a fresh clone.
+    try:
+        conn = fresh_db().ensure_ready()
+        counts = fresh_db().stats(conn)
+        conn.close()
+        print("Database:", os.path.abspath(db.DB_PATH))
+        print("Rows:", ", ".join(f"{k}={v}" for k, v in counts.items() if v))
+    except Exception as e:
+        print("Database initialisation failed:", e)
+        traceback.print_exc()
     
     # Allow port reuse
     socketserver.TCPServer.allow_reuse_address = True

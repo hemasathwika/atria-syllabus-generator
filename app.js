@@ -7,14 +7,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   let schemeSearchQuery = '';
   let schemeTypeFilter = 'ALL';
 
-  // 1. Load Data
+  // 1. Load Data — served from SQLite via /api/state, with the static JSON as fallback
   try {
-    const res = await fetch('data/default_data.json');
-    if (res.ok) {
-      appState = await res.json();
-    }
+    let res = await fetch('/api/state');
+    if (!res.ok) throw new Error(`api/state ${res.status}`);
+    appState = await res.json();
   } catch (e) {
-    console.warn('Could not load from data/default_data.json via fetch, using fallback.');
+    console.warn('Could not load /api/state, falling back to data/default_data.json', e);
+    try {
+      const res = await fetch('data/default_data.json');
+      if (res.ok) appState = await res.json();
+    } catch (e2) {
+      console.warn('Could not load data/default_data.json either, using built-in fallback.');
+    }
   }
 
   if (!appState) {

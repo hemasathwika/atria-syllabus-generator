@@ -12,3 +12,10 @@ __pycache__/
 
 # Local runtime logs
 *.log
+
+# SQLite runtime files (the schema and JSON seed are versioned instead)
+*.db
+*.db-wal
+*.db-shm
+backups/
+
