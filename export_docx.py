@@ -200,7 +200,24 @@ def generate_scheme_docx(dept_data, output_path="Generated_CSE_2024_SCHEME.docx"
              0.514, 0.792, 0.403, 0.417, 0.611, 0.736]
     col_w_in = [Inches(w) for w in col_w]
 
-    sem_items = sorted(dept_data.get('schemes', {}).items(), key=lambda kv: int(kv[0]))
+    # Only print semesters that actually hold courses. An empty array left behind
+    # in the data used to produce a page with a header row and a zeroed TOTAL row,
+    # which read as an orphaned fragment of another semester.
+    sem_items = [(num, courses) for num, courses in
+                 sorted(dept_data.get('schemes', {}).items(), key=lambda kv: int(kv[0]))
+                 if courses]
+
+    if not sem_items:
+        add_institution_header(doc, dept_data['name'])
+        empty_p = doc.add_paragraph()
+        empty_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        empty_r = empty_p.add_run("No courses have been added to any semester yet.")
+        _force_font(empty_r)
+        empty_r.font.size = Pt(10.5)
+        doc.save(output_path)
+        print(f"Generated scheme document (empty): {output_path}")
+        return
+
     for sem_index, (sem_num, courses) in enumerate(sem_items):
         if sem_index > 0:
             doc.add_page_break()
