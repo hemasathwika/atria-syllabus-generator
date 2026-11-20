@@ -146,7 +146,9 @@ def add_institution_header(doc, dept_name):
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p.paragraph_format.space_before = Pt(0)
         p.paragraph_format.space_after = Pt(4 if idx < len(lines) - 1 else 0)
-        p.paragraph_format.line_spacing = Pt(11)
+        # Single line spacing, never "exactly 11pt": the 14pt title needs more
+        # than 11pt of line box or its ascenders get clipped by the cell edge.
+        p.paragraph_format.line_spacing = 1.0
         r = p.add_run(text)
         _force_font(r)
         r.font.size = Pt(size)
