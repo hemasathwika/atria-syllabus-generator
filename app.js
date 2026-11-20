@@ -523,7 +523,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const credentialLoginForm = document.getElementById('credentialLoginForm');
   const loginAlertBox = document.getElementById('loginAlertBox');
   if (credentialLoginForm) {
-    credentialLoginForm.addEventListener('submit', (e) => {
+    credentialLoginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const rawEmail = (document.getElementById('loginInputEmail').value || '').trim();
       const pwd = (document.getElementById('loginInputPassword').value || '').trim();
@@ -538,25 +538,30 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       const email = syntaxCheck.email;
-      const auth = appState.auth_system || {};
-      const allUsers = [...(auth.leadership || []), ...(auth.faculty_roster || [])];
 
-      // Check user match
-      const matchedUser = allUsers.find(u => (u.email || '').toLowerCase() === email);
-
-      if (matchedUser) {
-        const expectedPwd = matchedUser.password || 'college@123';
-        if (pwd === expectedPwd || pwd === 'college@123') {
-          if (loginAlertBox) loginAlertBox.style.display = 'none';
-          loginUser(matchedUser);
+      // Credentials are verified by the server, never against passwords that
+      // this page may have received.
+      if (loginAlertBox) loginAlertBox.style.display = 'none';
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, password: pwd })
+        });
+        const payload = await res.json().catch(() => ({}));
+        if (res.ok && payload.user) {
+          loginUser(payload.user);
           return;
         }
-      }
-
-      // If invalid
-      if (loginAlertBox) {
-        loginAlertBox.style.display = 'block';
-        loginAlertBox.textContent = '⚠️ Invalid password for ' + email + '. Please verify your credentials or click an account in the directory below to auto-fill.';
+        if (loginAlertBox) {
+          loginAlertBox.style.display = 'block';
+          loginAlertBox.textContent = '⚠️ ' + (payload.message || ('Invalid password for ' + email + '.'));
+        }
+      } catch (err) {
+        if (loginAlertBox) {
+          loginAlertBox.style.display = 'block';
+          loginAlertBox.textContent = '⚠️ Could not reach the server. Is run_app.py running?';
+        }
       }
     });
   }
@@ -599,46 +604,46 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      const auth = appState.auth_system = appState.auth_system || {};
-      auth.faculty_roster = auth.faculty_roster || [];
-      const allUsers = [...(auth.leadership || []), ...(auth.faculty_roster || [])];
-
-      if (allUsers.some(u => (u.email || '').toLowerCase() === email)) {
+      // The server owns account creation: it checks for duplicates, writes the
+      // record and opens a session. The browser never sees a password list.
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: fullName,
+            email: email,
+            dept: dept,
+            role: roleCategory,
+            password: password
+          })
+        });
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok || !payload.user) {
+          if (registerAlertBox) {
+            registerAlertBox.style.display = 'block';
+            registerAlertBox.style.background = '#fef2f2';
+            registerAlertBox.style.border = '1px solid #fecaca';
+            registerAlertBox.style.color = '#991b1b';
+            registerAlertBox.textContent = '⚠️ ' + (payload.message || 'Registration failed. Please try again.');
+          }
+          return;
+        }
+        loginUser(payload.user);
+        alert(`🎉 Welcome to Atria Institute of Technology Curriculum Portal, ${fullName}!\n\nYour account (${email}) has been registered with View & Download access for all department schemes and syllabi.`);
+      } catch (err) {
         if (registerAlertBox) {
           registerAlertBox.style.display = 'block';
-          registerAlertBox.style.background = '#fef2f2';
-          registerAlertBox.style.border = '1px solid #fecaca';
-          registerAlertBox.style.color = '#991b1b';
-          registerAlertBox.textContent = '⚠️ An account with this email is already registered. Please sign in or reset password.';
+          registerAlertBox.textContent = '⚠️ Could not reach the server. Is run_app.py running?';
         }
-        return;
       }
-
-      // Create new self-registered user (View-Only per institutional policy)
-      const newUser = {
-        id: `REG-${Date.now().toString().slice(-4)}`,
-        name: fullName,
-        designation: roleCategory,
-        email: email,
-        dept: dept,
-        password: password,
-        can_edit: false,
-        can_manage_faculty: false,
-        role: `${roleCategory} (View-Only)`
-      };
-
-      auth.faculty_roster.push(newUser);
-      await saveStateToServer();
-
-      // Automatically sign in the newly registered user
-      loginUser(newUser);
-      alert(`🎉 Welcome to Atria Institute of Technology Curriculum Portal, ${fullName}!\n\nYour account (${email}) has been registered with View & Download access for all department schemes and syllabi.`);
     });
   }
 
   // 1.3 Password Reset with Simulated Registered Email OTP
   let activeResetOtp = null;
   let activeResetUser = null;
+  let activeResetEmail = null;
 
   const btnSendResetOtp = document.getElementById('btnSendResetOtp');
   const resetInputEmail = document.getElementById('resetInputEmail');
@@ -650,7 +655,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const resetVerifyForm = document.getElementById('resetVerifyForm');
 
   if (btnSendResetOtp && resetInputEmail) {
-    btnSendResetOtp.addEventListener('click', () => {
+    btnSendResetOtp.addEventListener('click', async () => {
       const rawEmail = (resetInputEmail.value || '').trim();
       const syntaxCheck = validateAtriaEmailSyntax(rawEmail);
       if (!syntaxCheck.valid) {
@@ -665,24 +670,36 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       const email = syntaxCheck.email;
-      const auth = appState.auth_system || {};
-      const allUsers = [...(auth.leadership || []), ...(auth.faculty_roster || [])];
-      const matched = allUsers.find(u => (u.email || '').toLowerCase() === email);
 
-      if (!matched) {
+      // The server issues and remembers the code; the browser only displays it
+      // in place of the email a production deployment would send.
+      try {
+        const res = await fetch('/api/request-reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        });
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok || !payload.otp) {
+          if (resetAlertBox) {
+            resetAlertBox.style.display = 'block';
+            resetAlertBox.style.background = '#fef2f2';
+            resetAlertBox.style.border = '1px solid #fecaca';
+            resetAlertBox.style.color = '#991b1b';
+            resetAlertBox.textContent = '⚠️ ' + (payload.message || ('No registered account found for ' + email + '.'));
+          }
+          return;
+        }
+        activeResetOtp = payload.otp;
+        activeResetUser = payload.name || email;
+        activeResetEmail = email;
+      } catch (err) {
         if (resetAlertBox) {
           resetAlertBox.style.display = 'block';
-          resetAlertBox.style.background = '#fef2f2';
-          resetAlertBox.style.border = '1px solid #fecaca';
-          resetAlertBox.style.color = '#991b1b';
-          resetAlertBox.textContent = '⚠️ No registered account found for ' + email + '. Please verify your email or register.';
+          resetAlertBox.textContent = '⚠️ Could not reach the server. Is run_app.py running?';
         }
         return;
       }
-
-      // Generate 6-digit OTP
-      activeResetOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      activeResetUser = matched;
 
       if (resetAlertBox) resetAlertBox.style.display = 'none';
       if (otpTargetEmailText) otpTargetEmailText.textContent = email;
@@ -700,11 +717,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const newPwd = document.getElementById('resetNewPassword').value;
       const confirmPwd = document.getElementById('resetConfirmPassword').value;
 
-      if (enteredOtp !== activeResetOtp) {
-        alert('⚠️ Invalid verification code! Please enter the 6-digit OTP displayed in the notification.');
-        return;
-      }
-
       if (newPwd !== confirmPwd) {
         alert('⚠️ Passwords do not match. Please re-enter.');
         return;
@@ -715,17 +727,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      // Update password
-      activeResetUser.password = newPwd;
-      await saveStateToServer();
+      // The server checks the code and writes the new password.
+      try {
+        const res = await fetch('/api/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: activeResetEmail, otp: enteredOtp, password: newPwd })
+        });
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          alert('⚠️ ' + (payload.message || 'Password reset failed. Please request a new code.'));
+          return;
+        }
+      } catch (err) {
+        alert('⚠️ Could not reach the server. Is run_app.py running?');
+        return;
+      }
 
-      alert(`✅ Password updated successfully for ${activeResetUser.name}!\nYou can now sign in with your new password.`);
+      alert(`✅ Password updated successfully for ${activeResetUser}!\nYou can now sign in with your new password.`);
 
       // Reset reset form state and switch to sign in
       if (resetStep1Box) resetStep1Box.style.display = 'block';
       if (resetStep2Box) resetStep2Box.style.display = 'none';
       activeResetOtp = null;
       activeResetUser = null;
+      activeResetEmail = null;
 
       const loginEmailInput = document.getElementById('loginInputEmail');
       const loginPwdInput = document.getElementById('loginInputPassword');
@@ -736,10 +762,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  function loginUser(user) {
+  async function loginUser(user) {
     currentUser = { ...user };
     try {
       localStorage.setItem('academic_user', JSON.stringify(currentUser));
+    } catch (e) {}
+
+    // Re-read the state as the authenticated user: administrators receive the
+    // credential directory, everyone else receives the redacted variant.
+    try {
+      const stateRes = await fetch('/api/state');
+      if (stateRes.ok) appState = await stateRes.json();
     } catch (e) {}
 
     const userDept = getUserAssignedDept(currentUser);
@@ -772,6 +805,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       localStorage.removeItem('academic_user');
     } catch (e) {}
+
+    // Drop the server-side session cookie as well.
+    fetch('/api/logout', { method: 'POST' }).catch(() => {});
 
     // Re-mask the credential directory so the next admin sees masked values.
     showAccountPasswords = false;
@@ -2633,6 +2669,11 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(appState)
       });
+      if (res.status === 401 || res.status === 403) {
+        const info = await res.json().catch(() => ({}));
+        console.warn('Save rejected by server:', info.message || res.status);
+        return { status: 'error', message: info.message || 'Not authorised to save.' };
+      }
       return await res.json();
     } catch (e) {
       console.warn('Local server save endpoint not reachable:', e);
@@ -3113,15 +3154,32 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
   // First-Time User Gate:
   // If user has an existing session in localStorage, enter the portal directly.
   // If opening for the first time or logged out, present the Login & Sign Up landing page!
-  const savedUser = localStorage.getItem('academic_user');
-  if (savedUser) {
+  // The cookie is the authority; localStorage is only a convenience mirror.
+  let restoredUser = null;
+  try {
+    const sessionRes = await fetch('/api/session');
+    if (sessionRes.ok) {
+      const sessionPayload = await sessionRes.json();
+      restoredUser = sessionPayload.user || null;
+    }
+  } catch (e) {}
+
+  if (!restoredUser) {
+    const savedUser = localStorage.getItem('academic_user');
+    if (savedUser) {
+      try { restoredUser = JSON.parse(savedUser); } catch (e) {}
+    }
+  }
+
+  if (restoredUser) {
+    currentUser = restoredUser;
     try {
-      currentUser = JSON.parse(savedUser);
-      const userDept = getUserAssignedDept(currentUser);
-      if (!isCrossDeptUser(currentUser) && userDept) {
-        currentDept = userDept;
-      }
+      localStorage.setItem('academic_user', JSON.stringify(currentUser));
     } catch (e) {}
+    const userDept = getUserAssignedDept(currentUser);
+    if (!isCrossDeptUser(currentUser) && userDept) {
+      currentDept = userDept;
+    }
     showAppMainView();
     initAppRouting();
   } else {
