@@ -106,6 +106,13 @@ def mark_header_row(row):
         trPr.append(OxmlElement('w:tblHeader'))
 
 
+def keep_row_together(row):
+    """Stop Word splitting a row's content across a page boundary."""
+    trPr = row._tr.get_or_add_trPr()
+    if trPr.find(qn('w:cantSplit')) is None:
+        trPr.append(OxmlElement('w:cantSplit'))
+
+
 def add_institution_header(doc, dept_name):
     """Logo left, centred institutional block, then the 2px rule — repeated per page."""
     header_table = doc.add_table(rows=1, cols=3)
@@ -204,6 +211,7 @@ def generate_scheme_docx(dept_data, output_path="Generated_CSE_2024_SCHEME.docx"
         sem_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         sem_p.paragraph_format.space_before = Pt(2)
         sem_p.paragraph_format.space_after = Pt(15)
+        sem_p.paragraph_format.keep_with_next = True
         sem_r = sem_p.add_run(f"{_roman(sem_num)} SEMESTER SCHEME OF TEACHING AND EXAMINATION")
         _force_font(sem_r)
         sem_r.font.size = Pt(10.5)
@@ -282,6 +290,10 @@ def generate_scheme_docx(dept_data, output_path="Generated_CSE_2024_SCHEME.docx"
             write_cell(cell, val, size=8.25, bold=True)
             set_cell_background(cell, "F1F5F9")
             set_cell_margins(cell, top=105, bottom=105, left=120, right=120)
+
+        # Never let Word break a course row across two pages.
+        for row in table.rows:
+            keep_row_together(row)
 
     doc.save(output_path)
     print(f"Generated scheme document: {output_path}")

@@ -14,8 +14,20 @@ import sys
 import json
 import traceback
 import urllib.parse
+import importlib
 
 PORT = 8000
+
+
+def fresh_exporter():
+    """Reload export_docx on every request.
+
+    Python caches imported modules, so a long-running server kept serving the
+    exporter code it loaded at start-up: edits to export_docx.py had no effect
+    on downloads until the process was restarted.
+    """
+    import export_docx
+    return importlib.reload(export_docx)
 
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -46,8 +58,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 
                 # Regenerate both docx files using export_docx
                 try:
-                    import export_docx
-                    export_docx.main()
+                    fresh_exporter().main()
                 except Exception as e:
                     print(f"Warning: could not regenerate docx files: {e}")
                 
@@ -68,13 +79,13 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith('/api/download/scheme-docx'):
             file_path = "Generated_CSE_2024_SCHEME.docx"
-            if not os.path.exists(file_path):
-                # Run export to generate
-                try:
-                    import export_docx
-                    export_docx.main()
-                except Exception as e:
-                    print(f"Export error: {e}")
+            # Always rebuild from the live data and the current exporter code.
+            # Previously this only ran when the file was missing, so every
+            # download handed back a stale document.
+            try:
+                fresh_exporter().main()
+            except Exception as e:
+                print(f"Export error: {e}")
             
             if os.path.exists(file_path):
                 self.send_response(200)
@@ -98,7 +109,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             course_code = query_params.get('course', ['ALL'])[0]
 
             try:
-                import export_docx
+                export_docx = fresh_exporter()
                 with open("data/default_data.json", "r", encoding="utf-8") as f:
                     data = json.load(f)
                 cse_data = next((d for d in data.get("departments", []) if d.get("code") == "CSE"), None)
