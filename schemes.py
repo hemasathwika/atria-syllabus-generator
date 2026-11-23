@@ -50,6 +50,12 @@ def _int(value):
 
 def ensure_schema(conn):
     conn.executescript(open(db.SCHEMA_PATH, encoding='utf-8').read())
+    # Lightweight migrations for databases created before these columns existed.
+    columns = {row[1] for row in conn.execute('PRAGMA table_info(schemes)')}
+    if 'mail_status' not in columns:
+        conn.execute("ALTER TABLE schemes ADD COLUMN mail_status TEXT NOT NULL DEFAULT ''")
+    if 'mail_sent_at' not in columns:
+        conn.execute("ALTER TABLE schemes ADD COLUMN mail_sent_at TEXT NOT NULL DEFAULT ''")
     conn.commit()
 
 
@@ -344,7 +350,68 @@ def transition(conn, user, scheme_uuid, action, note=''):
         (new_status, submitted, decided_at, decided_by, visibility, now, scheme['id']))
     _write_version(conn, scheme['id'], email, note or f'Status: {new_status}')
     conn.commit()
+
+    if new_status == STATUS_APPROVED:
+        # Mail the approved copy to the owner's registered address. Never let a
+        # mail failure roll back the approval itself.
+        try:
+            _mail_approval(conn, scheme_uuid)
+        except Exception as exc:  # pragma: no cover - defensive
+            conn.execute("UPDATE schemes SET mail_status = 'error', mail_sent_at = ? WHERE uuid = ?",
+                         (_now(), scheme_uuid))
+            conn.commit()
+            print(f'Approval mail failed: {exc}')
+
     return get_scheme(conn, scheme_uuid)
+
+
+def _approved_docx(scheme):
+    """Build the approved document in memory so it can be attached."""
+    import tempfile
+    import export_docx
+
+    path = os.path.join(tempfile.gettempdir(), f"approved_{scheme.get('uuid', 'scheme')}.docx")
+    export_docx.generate_scheme_docx(to_dept_data(scheme), path)
+    with open(path, 'rb') as handle:
+        return handle.read()
+
+
+def _mail_approval(conn, scheme_uuid):
+    import importlib
+    import mailer
+    mailer = importlib.reload(mailer)
+
+    scheme = get_scheme(conn, scheme_uuid)
+    if not scheme:
+        return {'status': 'error', 'detail': 'Scheme not found'}
+
+    owner = conn.execute('SELECT name FROM users WHERE email = ?',
+                         (scheme.get('owner_email', ''),)).fetchone()
+    scheme['owner_name'] = owner[0] if owner else ''
+
+    try:
+        payload = _approved_docx(scheme)
+    except Exception as exc:
+        payload = None
+        print(f'Could not render approved document: {exc}')
+
+    result = mailer.send_approval_mail(scheme, payload)
+    conn.execute('UPDATE schemes SET mail_status = ?, mail_sent_at = ? WHERE uuid = ?',
+                 (result.get('status', ''), result.get('at', ''), scheme_uuid))
+    conn.commit()
+    return result
+
+
+def resend_approval_mail(conn, user, scheme_uuid):
+    scheme = get_scheme(conn, scheme_uuid)
+    if not scheme:
+        raise KeyError('Scheme not found')
+    role = (user or {}).get('role') or ''
+    if (user or {}).get('email') != scheme.get('owner_email') and role != 'ADMIN':
+        raise PermissionError('Only the owner can resend the approved copy')
+    if scheme.get('status') != STATUS_APPROVED:
+        raise PermissionError('Only an approved scheme can be mailed')
+    return _mail_approval(conn, scheme_uuid)
 
 
 def list_versions(conn, scheme_uuid):

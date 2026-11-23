@@ -323,6 +323,10 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                                       payload.get('action', ''), payload.get('note', ''))
             elif action == 'restore':
                 item = mod.restore_version(conn, user, scheme_uuid, int(payload.get('version_no') or 0))
+            elif action == 'email':
+                result = mod.resend_approval_mail(conn, user, scheme_uuid)
+                return self._json(200, {"status": "ok", "mail": result,
+                                        "scheme": mod.get_scheme(conn, scheme_uuid)})
             elif action == 'delete':
                 mod.delete_scheme(conn, user, scheme_uuid)
                 return self._json(200, {"status": "ok", "message": "Scheme deleted"})
@@ -416,6 +420,19 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
         if path.startswith('/api/download/scheme/'):
             return self._scheme_docx(path)
+
+        if path == '/api/mail/status':
+            try:
+                import importlib
+                import mailer
+                mailer = importlib.reload(mailer)
+                config = mailer.load_config()
+                return self._json(200, {"status": "ok",
+                                        "configured": bool(config.get('configured')),
+                                        "sender": config.get('sender', ''),
+                                        "preview_dir": mailer.OUTBOX_DIR})
+            except Exception as e:
+                return self._json(500, {"status": "error", "message": str(e)})
 
         if self.path.startswith('/api/download/scheme-docx'):
             file_path = "Generated_CSE_2024_SCHEME.docx"

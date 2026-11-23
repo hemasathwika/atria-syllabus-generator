@@ -201,7 +201,7 @@
       '<td>' + esc(s.semester) + '</td>' +
       '<td>' + esc(s.owner_email) + '</td>' +
       '<td>' + (s.course_count || 0) + ' · ' + (s.credits || 0) + ' cr</td>' +
-      '<td>' + badge(s.status) + '</td>' +
+      '<td>' + badge(s.status) + mailTag(s) + '</td>' +
       '<td>' + fmtDate(s.updated_at) + '</td>' +
       '<td class="ws-actions">' + parts.join('') + '</td>' +
       '</tr>';
@@ -218,10 +218,20 @@
     parts.push('<button class="ws-act" data-act="download" data-uuid="' + s.uuid + '">DOCX</button>');
     parts.push('<button class="ws-act" data-act="print" data-uuid="' + s.uuid + '">Print</button>');
     parts.push('<button class="ws-act" data-act="versions" data-uuid="' + s.uuid + '">Versions</button>');
+    if (s.status === 'Approved') {
+      parts.push('<button class="ws-act" data-act="email" data-uuid="' + s.uuid + '">Email copy</button>');
+    }
     if (EDITABLE.includes(s.status)) {
       parts.push('<button class="ws-act ws-danger" data-act="delete" data-uuid="' + s.uuid + '">Delete</button>');
     }
     return parts.join('');
+  }
+
+  function mailTag(s) {
+    if (s.mail_status === 'sent') return '<span class="ws-mail ok" title="Approved copy emailed to ' + esc(s.owner_email || '') + '">✉ sent</span>';
+    if (s.mail_status === 'not-configured') return '<span class="ws-mail prev" title="SMTP not configured - preview saved to data/outbox">✉ preview</span>';
+    if (s.mail_status === 'error') return '<span class="ws-mail err" title="Mail failed">✉ failed</span>';
+    return '';
   }
 
   function mineRow(s) {
@@ -232,7 +242,7 @@
       '<td>' + esc(s.academic_year || '—') + '</td>' +
       '<td>' + esc(s.regulation || '—') + '</td>' +
       '<td>' + (s.course_count || 0) + ' · ' + (s.credits || 0) + ' cr</td>' +
-      '<td>' + badge(s.status) + '</td>' +
+      '<td>' + badge(s.status) + mailTag(s) + '</td>' +
       '<td>' + fmtDate(s.updated_at) + '</td>' +
       '<td class="ws-actions">' + ownerActions(s) + '</td>' +
       '</tr>';
@@ -303,6 +313,13 @@
     await load();
   }
 
+  async function emailCopy(uuid) {
+    const body = await api('/api/schemes/' + uuid + '/email', 'POST', {});
+    const mail = body.mail || {};
+    alert(mail.detail || 'Approved copy sent.');
+    await load();
+  }
+
   async function deleteScheme(uuid) {
     if (!confirm('Delete this draft? This cannot be undone from the dashboard.')) return;
     await api('/api/schemes/' + uuid + '/delete', 'POST', {});
@@ -316,6 +333,9 @@
       note = prompt('What needs to change?', 'Please amend the scheme.') || '';
     }
     const body = await api('/api/schemes/' + uuid + '/status', 'POST', { action, note });
+    if (body.mail && action === 'dean_approve') {
+      alert(body.mail.detail || 'Scheme approved.');
+    }
     if (window.activeScheme && window.activeScheme.uuid === uuid) {
       window.activeScheme.status = body.scheme.status;
       app().refreshActiveBar && app().refreshActiveBar();
@@ -434,6 +454,7 @@
         else if (act === 'versions') await showVersions(uuid);
         else if (act === 'copy') await copyScheme(uuid);
         else if (act === 'delete') await deleteScheme(uuid);
+        else if (act === 'email') await emailCopy(uuid);
       } catch (e) {
         alert(e.message);
       }

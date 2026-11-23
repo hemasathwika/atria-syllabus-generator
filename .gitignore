@@ -21,3 +21,5 @@ backups/
 
 
 data/Generated_*.docx
+data/mail_config.json
+data/outbox/
