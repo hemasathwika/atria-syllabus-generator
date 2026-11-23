@@ -28,13 +28,14 @@ def load_config():
         'password': os.environ.get('ATRIA_SMTP_PASSWORD', ''),
         'sender': os.environ.get('ATRIA_SMTP_FROM', ''),
         'use_tls': (os.environ.get('ATRIA_SMTP_TLS', 'true').lower() != 'false'),
+        'sender_name': os.environ.get('ATRIA_SMTP_NAME', ''),
     }
 
     if os.path.exists(CONFIG_PATH):
         try:
             with open(CONFIG_PATH, encoding='utf-8') as f:
                 stored = json.load(f)
-            for key in ('host', 'user', 'password', 'sender', 'use_tls'):
+            for key in ('host', 'user', 'password', 'sender', 'use_tls', 'sender_name'):
                 if stored.get(key):
                     config[key] = stored[key]
             if stored.get('port'):
@@ -45,14 +46,15 @@ def load_config():
     if not config['sender']:
         config['sender'] = config['user'] or 'no-reply@atria.local'
 
-    config['configured'] = bool(config['host'] and config['sender'])
+    config['configured'] = bool(config['host'] and config['sender'] and (config['password'] or not config['user']))
     return config
 
 
 def _message(scheme, to_email, config):
     msg = EmailMessage()
     msg['Subject'] = f"Approved scheme: {scheme.get('name') or 'Scheme'} ({scheme.get('department_code')} · Sem {scheme.get('semester')})"
-    msg['From'] = config['sender']
+    from email.utils import formataddr
+    msg['From'] = formataddr((config['sender_name'], config['sender'])) if config.get('sender_name') else config['sender']
     msg['To'] = to_email
 
     approved_on = scheme.get('decided_at') or datetime.datetime.now().isoformat(timespec='seconds')

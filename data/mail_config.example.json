@@ -1,0 +1,8 @@
+{
+  "host": "smtp.office365.com",
+  "port": 587,
+  "user": "your.address@atria.edu.in",
+  "password": "PASTE-YOUR-MAILBOX-PASSWORD-HERE",
+  "sender": "your.address@atria.edu.in",
+  "use_tls": true
+}
