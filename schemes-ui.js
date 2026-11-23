@@ -101,15 +101,35 @@
   }
 
   // ---------------------------------------------------------------- loading
+  function paintCounts() {
+    if ($('wsCardMine')) $('wsCardMine').textContent = (data.mine || []).length;
+    if ($('wsCardAvail')) $('wsCardAvail').textContent = (data.available || []).length;
+    if ($('wsCardApprovals')) $('wsCardApprovals').textContent = (data.approvals || []).length;
+  }
+
+  function showLanding() {
+    $('wsLanding').style.display = 'grid';
+    $('wsListView').style.display = 'none';
+    loadCounts();
+  }
+
+  function openList(target) {
+    scope = target || 'mine';
+    $('wsLanding').style.display = 'none';
+    $('wsListView').style.display = 'block';
+    $('wsListTitle').textContent = scope === 'mine' ? 'My Schemes'
+      : scope === 'available' ? 'Available Schemes' : 'Approvals';
+    load();
+  }
+
   async function load() {
     if (!user() || !user().email) return;
     try {
       fillFilters();
       const body = await api('/api/schemes?' + query());
       data[scope] = body.items || [];
-      if (scope === 'mine') $('wsCountMine').textContent = data.mine.length;
-      else if (scope === 'available') $('wsCountAvail').textContent = data.available.length;
-      else $('wsCountApprovals').textContent = data.approvals.length;
+      paintCounts();
+      if ($('wsListCount')) $('wsListCount').textContent = data[scope].length;
       render();
     } catch (err) {
       $('wsBody').innerHTML = '<tr><td colspan="10" class="ws-error-cell">' + esc(err.message) + '</td></tr>';
@@ -120,15 +140,13 @@
     try {
       const mine = await api('/api/schemes?scope=mine');
       data.mine = mine.items || [];
-      $('wsCountMine').textContent = data.mine.length;
       const avail = await api('/api/schemes?scope=available');
       data.available = avail.items || [];
-      $('wsCountAvail').textContent = data.available.length;
       if (['HOD', 'DEAN', 'ADMIN'].includes(user().role)) {
         const queue = await api('/api/schemes?scope=approvals');
         data.approvals = queue.items || [];
-        $('wsCountApprovals').textContent = data.approvals.length;
       }
+      paintCounts();
     } catch (e) { /* anonymous viewers */ }
   }
 
@@ -281,8 +299,6 @@
   async function copyScheme(uuid) {
     const body = await api('/api/schemes/' + uuid + '/copy', 'POST', {});
     await loadCounts();
-    scope = 'mine';
-    document.querySelectorAll('.ws-switch-btn').forEach((b) => b.classList.toggle('active', b.dataset.scope === 'mine'));
     app().openSchemeEditor(body.scheme);
     await load();
   }
@@ -373,13 +389,11 @@
 
   // ---------------------------------------------------------------- wiring
   function wire() {
-    document.querySelectorAll('.ws-switch-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        scope = btn.dataset.scope;
-        document.querySelectorAll('.ws-switch-btn').forEach((b) => b.classList.toggle('active', b === btn));
-        load();
-      });
+    document.querySelectorAll('.ws-card').forEach((card) => {
+      card.addEventListener('click', () => openList(card.dataset.scope));
     });
+
+    $('wsBack').addEventListener('click', showLanding);
 
     $('wsSearch').addEventListener('input', (e) => { searchTerm = e.target.value.trim(); render(); });
 
@@ -469,10 +483,10 @@
       const wsEl = $('schemeWorkspace');
       if (wsEl) wsEl.style.display = window.activeScheme ? 'none' : 'block';
       scope = 'mine';
-      const approvalsTab = $('wsTabApprovals');
-      if (approvalsTab) approvalsTab.style.display = ['HOD', 'DEAN', 'ADMIN'].includes(app().user.role) ? 'inline-block' : 'none';
-      document.querySelectorAll('.ws-switch-btn').forEach((b) => b.classList.toggle('active', b.dataset.scope === 'mine'));
-      loadCounts().then(load);
+      const approvalsCard = $('wsCardApprovals');
+      if (approvalsCard) approvalsCard.style.display = ['HOD', 'DEAN', 'ADMIN'].includes(app().user.role) ? 'flex' : 'none';
+      if (window.activeScheme) loadCounts();
+      else showLanding();
     }
   }
 
@@ -483,5 +497,5 @@
     setTimeout(init, 250);
   });
 
-  window.AtriaSchemes = { reload: () => { loadCounts().then(load); }, loadCounts };
+  window.AtriaSchemes = { reload: () => { showLanding(); }, loadCounts };
 })();

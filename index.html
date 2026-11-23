@@ -522,30 +522,51 @@
           <button id="btnCreateScheme" class="btn btn-primary" type="button">+ Create New Scheme</button>
         </div>
 
-        <div class="ws-bar">
-          <div class="ws-switch">
-            <button class="ws-switch-btn active" data-scope="mine" type="button">My Schemes <span class="ws-count" id="wsCountMine">0</span></button>
-            <button class="ws-switch-btn" data-scope="available" type="button">Available Schemes <span class="ws-count" id="wsCountAvail">0</span></button>
-            <button class="ws-switch-btn" data-scope="approvals" id="wsTabApprovals" type="button" style="display: none;">Approvals <span class="ws-count" id="wsCountApprovals">0</span></button>
+        <div id="wsLanding" class="ws-landing">
+          <button class="ws-card" data-scope="mine" type="button">
+            <span class="ws-card-count" id="wsCardMine">0</span>
+            <span class="ws-card-title">My Schemes</span>
+            <span class="ws-card-sub">Schemes you created or copied, with approval status.</span>
+            <span class="ws-card-go">Open →</span>
+          </button>
+          <button class="ws-card" data-scope="available" type="button">
+            <span class="ws-card-count" id="wsCardAvail">0</span>
+            <span class="ws-card-title">Available Schemes</span>
+            <span class="ws-card-sub">Approved schemes shared by other faculty, ready to copy.</span>
+            <span class="ws-card-go">Browse →</span>
+          </button>
+          <button class="ws-card" data-scope="approvals" id="wsCardApprovals" type="button" style="display: none;">
+            <span class="ws-card-count" id="wsCardApprovals">0</span>
+            <span class="ws-card-title">Approvals</span>
+            <span class="ws-card-sub">Schemes waiting for your HOD or Dean decision.</span>
+            <span class="ws-card-go">Review →</span>
+          </button>
+        </div>
+
+        <div id="wsListView" style="display: none;">
+          <div class="ws-listhead">
+            <button id="wsBack" class="ws-back" type="button">← All schemes</button>
+            <h3 id="wsListTitle" class="ws-listtitle">My Schemes</h3>
+            <span class="ws-count" id="wsListCount">0</span>
+            <input id="wsSearch" class="ws-search" type="search" placeholder="Search scheme, course code or title…">
           </div>
-          <input id="wsSearch" class="ws-search" type="search" placeholder="Search scheme, course code or title…">
-        </div>
 
-        <div class="ws-filters">
-          <select id="wsFilterDept" class="ws-select"><option value="">All departments</option></select>
-          <select id="wsFilterSem" class="ws-select"><option value="">All semesters</option></select>
-          <select id="wsFilterYear" class="ws-select"><option value="">All academic years</option></select>
-          <select id="wsFilterReg" class="ws-select"><option value="">All regulations</option></select>
-          <select id="wsFilterStatus" class="ws-select"><option value="">All statuses</option></select>
-          <button id="wsClearFilters" class="btn btn-outline" type="button">Clear</button>
-        </div>
+          <div class="ws-filters">
+            <select id="wsFilterDept" class="ws-select"><option value="">All departments</option></select>
+            <select id="wsFilterSem" class="ws-select"><option value="">All semesters</option></select>
+            <select id="wsFilterYear" class="ws-select"><option value="">All academic years</option></select>
+            <select id="wsFilterReg" class="ws-select"><option value="">All regulations</option></select>
+            <select id="wsFilterStatus" class="ws-select"><option value="">All statuses</option></select>
+            <button id="wsClearFilters" class="btn btn-outline" type="button">Clear</button>
+          </div>
 
-        <div class="ws-table-wrap">
-          <table class="data-table ws-table">
-            <thead><tr id="wsHeadRow"></tr></thead>
-            <tbody id="wsBody"></tbody>
-          </table>
-          <div id="wsEmpty" class="ws-empty" style="display: none;"></div>
+          <div class="ws-table-wrap">
+            <table class="data-table ws-table">
+              <thead><tr id="wsHeadRow"></tr></thead>
+              <tbody id="wsBody"></tbody>
+            </table>
+            <div id="wsEmpty" class="ws-empty" style="display: none;"></div>
+          </div>
         </div>
       </div>
 
@@ -564,6 +585,7 @@
         </div>
       </div>
 
+      <div id="schemeEditorPane" style="display: none;">
       <!-- Official Atria Scheme Header Banner -->
       <div class="card" style="margin-bottom: 16px; padding: 12px 20px; position: relative; min-height: 56px; background: #ffffff;">
         <div style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%);">
@@ -685,6 +707,7 @@
             <tfoot id="schemeTableFoot"></tfoot>
           </table>
         </div>
+      </div>
       </div>
     </section>
 

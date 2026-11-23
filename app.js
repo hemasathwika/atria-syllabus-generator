@@ -61,6 +61,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     can_manage_faculty: false
   };
 
+  let sessionExpired = false;
+
   try {
     const saved = localStorage.getItem('academic_user');
     if (saved) {
@@ -71,6 +73,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
   } catch (e) {}
+
+  // Sessions live in the server's memory. After a restart the cached user is
+  // stale, so authoring calls would fail with 401 while the UI still looked
+  // signed in. Validate once, and fall back to the gate if the cookie is gone.
+  if (currentUser && currentUser.id !== 'GUEST') {
+    try {
+      const sessionRes = await fetch('/api/session');
+      if (sessionRes.status === 401) {
+        sessionExpired = true;
+        try { localStorage.removeItem('academic_user'); } catch (e) {}
+        currentUser = {
+          id: 'GUEST',
+          name: 'Guest / Student Viewer',
+          role: 'VIEWER',
+          can_edit: false,
+          can_manage_faculty: false
+        };
+      }
+    } catch (e) {}
+  }
 
   function renderDeptSelector() {
     if (!deptSelect) return;
@@ -3210,7 +3232,7 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
     showAppMainView();
     initAppRouting();
   } else {
-    showAuthLandingView();
+    showAuthLandingView(sessionExpired ? 'Your session expired because the server restarted. Please sign in again.' : '');
   }
 
   // ------------------------------------------------------------------ bridge
@@ -3257,6 +3279,8 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
       window.navigateToTab('tab-scheme');
       const workspace = document.getElementById('schemeWorkspace');
       if (workspace) workspace.style.display = 'none';
+      const editorPane = document.getElementById('schemeEditorPane');
+      if (editorPane) editorPane.style.display = 'block';
       try { renderSchemeTable(); } catch (e) { console.warn('Scheme render failed', e); }
       paintActiveBar(scheme);
     },
@@ -3266,6 +3290,8 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
       paintActiveBar(null);
       const workspace = document.getElementById('schemeWorkspace');
       if (workspace) workspace.style.display = 'block';
+      const editorPane = document.getElementById('schemeEditorPane');
+      if (editorPane) editorPane.style.display = 'none';
     }
   };
 });
