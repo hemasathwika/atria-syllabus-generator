@@ -3255,10 +3255,17 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
       const sel = document.getElementById('deptSelector');
       if (sel) sel.value = scheme.department_code;
       window.navigateToTab('tab-scheme');
+      const workspace = document.getElementById('schemeWorkspace');
+      if (workspace) workspace.style.display = 'none';
       try { renderSchemeTable(); } catch (e) { console.warn('Scheme render failed', e); }
       paintActiveBar(scheme);
     },
     refreshActiveBar() { paintActiveBar(window.activeScheme); },
-    closeActiveScheme() { window.activeScheme = null; paintActiveBar(null); }
+    closeActiveScheme() {
+      window.activeScheme = null;
+      paintActiveBar(null);
+      const workspace = document.getElementById('schemeWorkspace');
+      if (workspace) workspace.style.display = 'block';
+    }
   };
 });

@@ -503,7 +503,7 @@ def main():
 
     # Allow port reuse
     socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", PORT), CustomHandler) as httpd:
+    with http.server.ThreadingHTTPServer(("", PORT), CustomHandler) as httpd:
         print("=" * 65)
         print("🎓 College Scheme & Syllabus Generator Platform")
         print("=" * 65)

@@ -438,10 +438,10 @@
     const bar = $('activeSchemeBar');
     if (bar) {
       $('asbClose').addEventListener('click', () => {
-        window.activeScheme = null;
-        bar.style.display = 'none';
-        window.navigateToTab('tab-home');
+        if (app() && app().closeActiveScheme) app().closeActiveScheme();
+        else { window.activeScheme = null; bar.style.display = 'none'; }
         load();
+        loadCounts();
       });
       $('asbSubmit').addEventListener('click', async () => {
         if (!window.activeScheme) return;
@@ -462,10 +462,12 @@
   function init() {
     if (!app() || !app().user || !app().user.email) return;
     const email = app().user.email;
-    $('schemeWorkspace').style.display = 'block';
     if (!wired) { wire(); wired = true; }
     if (email !== lastEmail) {
       lastEmail = email;
+      // Never force the list visible while a scheme is open for editing.
+      const wsEl = $('schemeWorkspace');
+      if (wsEl) wsEl.style.display = window.activeScheme ? 'none' : 'block';
       scope = 'mine';
       const approvalsTab = $('wsTabApprovals');
       if (approvalsTab) approvalsTab.style.display = ['HOD', 'DEAN', 'ADMIN'].includes(app().user.role) ? 'inline-block' : 'none';

@@ -262,42 +262,6 @@
     <!-- TAB 0: HOME / GUIDED DASHBOARD OVERVIEW     -->
     <!-- ========================================== -->
     <section id="tab-home" class="tab-pane active">
-      <!-- Scheme Workspace: create, track and reuse schemes -->
-      <div id="schemeWorkspace" class="ws-shell" style="display: none;">
-        <div class="ws-head">
-          <div>
-            <h2 class="ws-title">Scheme Workspace</h2>
-            <p class="ws-sub">Create teaching &amp; examination schemes, follow their approval, and reuse schemes shared by other faculty.</p>
-          </div>
-          <button id="btnCreateScheme" class="btn btn-primary" type="button">+ Create New Scheme</button>
-        </div>
-
-        <div class="ws-bar">
-          <div class="ws-switch">
-            <button class="ws-switch-btn active" data-scope="mine" type="button">My Schemes <span class="ws-count" id="wsCountMine">0</span></button>
-            <button class="ws-switch-btn" data-scope="available" type="button">Available Schemes <span class="ws-count" id="wsCountAvail">0</span></button>
-            <button class="ws-switch-btn" data-scope="approvals" id="wsTabApprovals" type="button" style="display: none;">Approvals <span class="ws-count" id="wsCountApprovals">0</span></button>
-          </div>
-          <input id="wsSearch" class="ws-search" type="search" placeholder="Search scheme, course code or title…">
-        </div>
-
-        <div class="ws-filters">
-          <select id="wsFilterDept" class="ws-select"><option value="">All departments</option></select>
-          <select id="wsFilterSem" class="ws-select"><option value="">All semesters</option></select>
-          <select id="wsFilterYear" class="ws-select"><option value="">All academic years</option></select>
-          <select id="wsFilterReg" class="ws-select"><option value="">All regulations</option></select>
-          <select id="wsFilterStatus" class="ws-select"><option value="">All statuses</option></select>
-          <button id="wsClearFilters" class="btn btn-outline" type="button">Clear</button>
-        </div>
-
-        <div class="ws-table-wrap">
-          <table class="data-table ws-table">
-            <thead><tr id="wsHeadRow"></tr></thead>
-            <tbody id="wsBody"></tbody>
-          </table>
-          <div id="wsEmpty" class="ws-empty" style="display: none;"></div>
-        </div>
-      </div>
 
       <!-- 1. Executive Banner with Live Logged-in User Context -->
       <div class="welcome-banner">
@@ -547,6 +511,44 @@
     <!-- TAB 1: SCHEME OF TEACHING & EXAMINATION    -->
     <!-- ========================================== -->
     <section id="tab-scheme" class="tab-pane">
+
+      <!-- Scheme Workspace: create, track and reuse schemes -->
+      <div id="schemeWorkspace" class="ws-shell" style="display: none;">
+        <div class="ws-head">
+          <div>
+            <h2 class="ws-title">Scheme Workspace</h2>
+            <p class="ws-sub">Create teaching &amp; examination schemes, follow their approval, and reuse schemes shared by other faculty.</p>
+          </div>
+          <button id="btnCreateScheme" class="btn btn-primary" type="button">+ Create New Scheme</button>
+        </div>
+
+        <div class="ws-bar">
+          <div class="ws-switch">
+            <button class="ws-switch-btn active" data-scope="mine" type="button">My Schemes <span class="ws-count" id="wsCountMine">0</span></button>
+            <button class="ws-switch-btn" data-scope="available" type="button">Available Schemes <span class="ws-count" id="wsCountAvail">0</span></button>
+            <button class="ws-switch-btn" data-scope="approvals" id="wsTabApprovals" type="button" style="display: none;">Approvals <span class="ws-count" id="wsCountApprovals">0</span></button>
+          </div>
+          <input id="wsSearch" class="ws-search" type="search" placeholder="Search scheme, course code or title…">
+        </div>
+
+        <div class="ws-filters">
+          <select id="wsFilterDept" class="ws-select"><option value="">All departments</option></select>
+          <select id="wsFilterSem" class="ws-select"><option value="">All semesters</option></select>
+          <select id="wsFilterYear" class="ws-select"><option value="">All academic years</option></select>
+          <select id="wsFilterReg" class="ws-select"><option value="">All regulations</option></select>
+          <select id="wsFilterStatus" class="ws-select"><option value="">All statuses</option></select>
+          <button id="wsClearFilters" class="btn btn-outline" type="button">Clear</button>
+        </div>
+
+        <div class="ws-table-wrap">
+          <table class="data-table ws-table">
+            <thead><tr id="wsHeadRow"></tr></thead>
+            <tbody id="wsBody"></tbody>
+          </table>
+          <div id="wsEmpty" class="ws-empty" style="display: none;"></div>
+        </div>
+      </div>
+
       <!-- Context bar shown when editing a scheme from the workspace -->
       <div id="activeSchemeBar" class="active-scheme-bar" style="display: none;">
         <div class="asb-left">
