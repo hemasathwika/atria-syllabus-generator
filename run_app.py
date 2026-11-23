@@ -19,6 +19,7 @@ import importlib
 
 import db
 import auth
+import schemes
 
 PORT = 8000
 
@@ -26,6 +27,12 @@ PORT = 8000
 def fresh_db():
     """Reload db.py too, so schema/persistence edits apply without a restart."""
     return importlib.reload(db)
+
+
+def fresh_schemes():
+    """Reload schemes.py for the same reason db/export_docx are reloaded."""
+    import schemes as _schemes
+    return importlib.reload(_schemes)
 
 
 def fresh_exporter():
@@ -144,6 +151,10 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 return self._reset_password()
             if path == '/api/save-state':
                 return self._save_state()
+            if path == '/api/schemes':
+                return self._scheme_create()
+            if path.startswith('/api/schemes/'):
+                return self._scheme_write(path)
             self.send_response(404)
             self.end_headers()
         except json.JSONDecodeError:
@@ -224,6 +235,142 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
         persist(state)
         self._json(200, {"status": "ok", "message": "Password updated."})
 
+    # ------------------------------------------------------------ schemes
+    def _scheme_conn(self):
+        conn = fresh_db().ensure_ready()
+        fresh_schemes().ensure_schema(conn)
+        return conn
+
+    def _scheme_list(self):
+        user = self._user()
+        qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+        scope = (qs.get('scope', ['mine'])[0] or 'mine').lower()
+        filters = {k: qs[k][0] for k in
+                   ('department', 'semester', 'academic_year', 'regulation', 'status', 'code', 'title')
+                   if qs.get(k)}
+        if scope == 'mine' and not user:
+            return self._json(401, {"status": "error", "message": "Sign in to see your schemes."})
+        conn = self._scheme_conn()
+        try:
+            items = fresh_schemes().list_schemes(conn, user or {}, scope, filters)
+        except Exception as e:
+            traceback.print_exc()
+            return self._json(500, {"status": "error", "message": str(e)})
+        finally:
+            conn.close()
+        return self._json(200, {"status": "ok", "scope": scope,
+                                "count": len(items), "items": items})
+
+    def _scheme_read(self, path):
+        parts = [p for p in path.split('/') if p]
+        if len(parts) < 3:
+            return self._json(404, {"status": "error", "message": "Scheme id missing"})
+        scheme_uuid = parts[2]
+        tail = parts[3] if len(parts) > 3 else ''
+        conn = self._scheme_conn()
+        try:
+            mod = fresh_schemes()
+            if tail == 'versions':
+                return self._json(200, {"status": "ok", "items": mod.list_versions(conn, scheme_uuid)})
+            item = mod.get_scheme(conn, scheme_uuid)
+        except KeyError as e:
+            return self._json(404, {"status": "error", "message": str(e)})
+        except Exception as e:
+            traceback.print_exc()
+            return self._json(500, {"status": "error", "message": str(e)})
+        finally:
+            conn.close()
+        if not item:
+            return self._json(404, {"status": "error", "message": "Scheme not found"})
+        return self._json(200, {"status": "ok", "scheme": item})
+
+    def _scheme_create(self):
+        user = self._require_editor()
+        if not user:
+            return
+        payload = self._body()
+        conn = self._scheme_conn()
+        try:
+            item = fresh_schemes().create_scheme(conn, user, payload)
+        except ValueError as e:
+            return self._json(400, {"status": "error", "message": str(e)})
+        except Exception as e:
+            traceback.print_exc()
+            return self._json(500, {"status": "error", "message": str(e)})
+        finally:
+            conn.close()
+        return self._json(201, {"status": "ok", "scheme": item})
+
+    def _scheme_write(self, path):
+        user = self._require_editor()
+        if not user:
+            return
+        parts = [p for p in path.split('/') if p]
+        if len(parts) < 3:
+            return self._json(400, {"status": "error", "message": "Scheme id missing"})
+        scheme_uuid = parts[2]
+        action = parts[3] if len(parts) > 3 else 'update'
+        payload = self._body()
+        conn = self._scheme_conn()
+        try:
+            mod = fresh_schemes()
+            if action == 'update':
+                item = mod.update_scheme(conn, user, scheme_uuid, payload)
+            elif action == 'copy':
+                item = mod.copy_scheme(conn, user, scheme_uuid)
+            elif action == 'status':
+                item = mod.transition(conn, user, scheme_uuid,
+                                      payload.get('action', ''), payload.get('note', ''))
+            elif action == 'restore':
+                item = mod.restore_version(conn, user, scheme_uuid, int(payload.get('version_no') or 0))
+            elif action == 'delete':
+                mod.delete_scheme(conn, user, scheme_uuid)
+                return self._json(200, {"status": "ok", "message": "Scheme deleted"})
+            else:
+                return self._json(400, {"status": "error", "message": f"Unknown action: {action}"})
+        except PermissionError as e:
+            return self._json(403, {"status": "error", "message": str(e)})
+        except KeyError as e:
+            return self._json(404, {"status": "error", "message": str(e)})
+        except ValueError as e:
+            return self._json(400, {"status": "error", "message": str(e)})
+        except Exception as e:
+            traceback.print_exc()
+            return self._json(500, {"status": "error", "message": str(e)})
+        finally:
+            conn.close()
+        return self._json(200, {"status": "ok", "scheme": item})
+
+    def _scheme_docx(self, path):
+        scheme_uuid = path.rsplit('/', 1)[-1].replace('.docx', '')
+        conn = self._scheme_conn()
+        try:
+            item = fresh_schemes().get_scheme(conn, scheme_uuid)
+            dept = conn.execute('SELECT name FROM departments WHERE code = ?',
+                                (item['department_code'],)).fetchone() if item else None
+        finally:
+            conn.close()
+        if not item:
+            return self._json(404, {"status": "error", "message": "Scheme not found"})
+        item['department_name'] = dept[0] if dept else item['department_code']
+        dept_data = fresh_schemes().to_dept_data(item)
+        out_path = os.path.join(db.DATA_DIR, f'Generated_{scheme_uuid}.docx')
+        try:
+            fresh_exporter().generate_scheme_docx(dept_data, out_path)
+        except Exception as e:
+            traceback.print_exc()
+            return self._json(500, {"status": "error", "message": f"Export failed: {e}"})
+        with open(out_path, 'rb') as f:
+            body = f.read()
+        self.send_response(200)
+        self.send_header('Content-Type',
+                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        self.send_header('Content-Disposition',
+                         f'attachment; filename="{item["department_code"]}_{item["semester"]}_SCHEME.docx"')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def _save_state(self):
         if not self._require_editor():
             return
@@ -260,6 +407,15 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             if not user:
                 return self._json(401, {"status": "error", "user": None})
             return self._json(200, {"status": "ok", "user": user})
+
+        if path == '/api/schemes':
+            return self._scheme_list()
+
+        if path.startswith('/api/schemes/'):
+            return self._scheme_read(path)
+
+        if path.startswith('/api/download/scheme/'):
+            return self._scheme_docx(path)
 
         if self.path.startswith('/api/download/scheme-docx'):
             file_path = "Generated_CSE_2024_SCHEME.docx"

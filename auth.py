@@ -48,7 +48,10 @@ def public_user(user):
     """A user record safe to hand to the browser."""
     if not user:
         return None
-    return {k: v for k, v in user.items() if k != 'password'}
+    safe = {k: v for k, v in user.items() if k != 'password'}
+    if not safe.get('dept') and user.get('department_code'):
+        safe['dept'] = user['department_code']
+    return safe
 
 
 def verify_credentials(state, email, password):

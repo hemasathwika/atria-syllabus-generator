@@ -2662,7 +2662,34 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
   // 9. Tab 3: Official Document Preview & Separate Export
   let currentPreviewMode = 'scheme'; // 'scheme' | 'syllabus' | 'all'
 
+  function schemeSemKey(value) {
+    const map = { I: '1', II: '2', III: '3', IV: '4', V: '5', VI: '6', VII: '7', VIII: '8' };
+    return map[String(value || '').toUpperCase()] || String(value || '');
+  }
+
   async function saveStateToServer() {
+    // When a workspace scheme is open, edits belong to that scheme document,
+    // not to the legacy whole-state payload.
+    if (window.activeScheme) {
+      const scheme = window.activeScheme;
+      if (scheme.readOnly) return { status: 'ok', message: 'Read-only scheme.' };
+      try {
+        const dept = (appState.departments || []).find(d => d.code === scheme.department_code);
+        const key = schemeSemKey(scheme.semester);
+        const courses = (dept && dept.schemes && dept.schemes[key]) || [];
+        const res = await fetch(`/api/schemes/${scheme.uuid}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ courses })
+        });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) return { status: 'error', message: body.message || 'Could not save the scheme.' };
+        return body;
+      } catch (e) {
+        return { status: 'error', message: 'Could not reach the server.' };
+      }
+    }
+
     try {
       const res = await fetch('/api/save-state', {
         method: 'POST',
@@ -3185,4 +3212,53 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
   } else {
     showAuthLandingView();
   }
+
+  // ------------------------------------------------------------------ bridge
+  // schemes-ui.js runs outside this closure, so expose the minimum surface it
+  // needs to open a scheme in the existing editor and keep the context bar honest.
+  const EDITABLE_STATUSES = ['Draft', 'Changes Requested by HOD', 'Changes Requested by Dean'];
+
+  function paintActiveBar(scheme) {
+    const bar = document.getElementById('activeSchemeBar');
+    if (!bar) return;
+    if (!scheme) { bar.style.display = 'none'; return; }
+    bar.style.display = 'flex';
+    const name = document.getElementById('asbName');
+    const meta = document.getElementById('asbMeta');
+    const status = document.getElementById('asbStatus');
+    const submit = document.getElementById('asbSubmit');
+    if (name) name.textContent = scheme.name || 'Untitled scheme';
+    if (meta) meta.textContent = `${scheme.department_code} · Semester ${scheme.semester} · ${scheme.academic_year || '—'} · Regulation ${scheme.regulation || '—'}`;
+    if (status) status.textContent = scheme.status || 'Draft';
+    if (submit) {
+      const canSubmit = !scheme.readOnly && EDITABLE_STATUSES.includes(scheme.status || 'Draft');
+      submit.style.display = canSubmit ? 'inline-flex' : 'none';
+    }
+  }
+
+  window.AtriaApp = {
+    get state() { return appState; },
+    get user() { return currentUser; },
+    get dept() { return currentDept; },
+    get sem() { return currentSem; },
+    renderSchemeTable,
+    openSchemeEditor(scheme) {
+      window.activeScheme = scheme;
+      const key = schemeSemKey(scheme.semester);
+      currentDept = scheme.department_code;
+      currentSem = key;
+      const dept = (appState.departments || []).find(d => d.code === scheme.department_code);
+      if (dept) {
+        dept.schemes = dept.schemes || {};
+        dept.schemes[key] = (scheme.courses || []).map(c => ({ ...c }));
+      }
+      const sel = document.getElementById('deptSelector');
+      if (sel) sel.value = scheme.department_code;
+      window.navigateToTab('tab-scheme');
+      try { renderSchemeTable(); } catch (e) { console.warn('Scheme render failed', e); }
+      paintActiveBar(scheme);
+    },
+    refreshActiveBar() { paintActiveBar(window.activeScheme); },
+    closeActiveScheme() { window.activeScheme = null; paintActiveBar(null); }
+  };
 });

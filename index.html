@@ -262,6 +262,43 @@
     <!-- TAB 0: HOME / GUIDED DASHBOARD OVERVIEW     -->
     <!-- ========================================== -->
     <section id="tab-home" class="tab-pane active">
+      <!-- Scheme Workspace: create, track and reuse schemes -->
+      <div id="schemeWorkspace" class="ws-shell" style="display: none;">
+        <div class="ws-head">
+          <div>
+            <h2 class="ws-title">Scheme Workspace</h2>
+            <p class="ws-sub">Create teaching &amp; examination schemes, follow their approval, and reuse schemes shared by other faculty.</p>
+          </div>
+          <button id="btnCreateScheme" class="btn btn-primary" type="button">+ Create New Scheme</button>
+        </div>
+
+        <div class="ws-bar">
+          <div class="ws-switch">
+            <button class="ws-switch-btn active" data-scope="mine" type="button">My Schemes <span class="ws-count" id="wsCountMine">0</span></button>
+            <button class="ws-switch-btn" data-scope="available" type="button">Available Schemes <span class="ws-count" id="wsCountAvail">0</span></button>
+            <button class="ws-switch-btn" data-scope="approvals" id="wsTabApprovals" type="button" style="display: none;">Approvals <span class="ws-count" id="wsCountApprovals">0</span></button>
+          </div>
+          <input id="wsSearch" class="ws-search" type="search" placeholder="Search scheme, course code or title…">
+        </div>
+
+        <div class="ws-filters">
+          <select id="wsFilterDept" class="ws-select"><option value="">All departments</option></select>
+          <select id="wsFilterSem" class="ws-select"><option value="">All semesters</option></select>
+          <select id="wsFilterYear" class="ws-select"><option value="">All academic years</option></select>
+          <select id="wsFilterReg" class="ws-select"><option value="">All regulations</option></select>
+          <select id="wsFilterStatus" class="ws-select"><option value="">All statuses</option></select>
+          <button id="wsClearFilters" class="btn btn-outline" type="button">Clear</button>
+        </div>
+
+        <div class="ws-table-wrap">
+          <table class="data-table ws-table">
+            <thead><tr id="wsHeadRow"></tr></thead>
+            <tbody id="wsBody"></tbody>
+          </table>
+          <div id="wsEmpty" class="ws-empty" style="display: none;"></div>
+        </div>
+      </div>
+
       <!-- 1. Executive Banner with Live Logged-in User Context -->
       <div class="welcome-banner">
         <div style="display: flex; gap: 18px; align-items: center;">
@@ -510,6 +547,21 @@
     <!-- TAB 1: SCHEME OF TEACHING & EXAMINATION    -->
     <!-- ========================================== -->
     <section id="tab-scheme" class="tab-pane">
+      <!-- Context bar shown when editing a scheme from the workspace -->
+      <div id="activeSchemeBar" class="active-scheme-bar" style="display: none;">
+        <div class="asb-left">
+          <span class="asb-label">Editing</span>
+          <strong id="asbName">—</strong>
+          <span id="asbMeta" class="asb-meta"></span>
+          <span id="asbStatus" class="ws-badge">Draft</span>
+        </div>
+        <div class="asb-actions">
+          <button class="btn btn-outline btn-sm" id="asbVersions" type="button">Version History</button>
+          <button class="btn btn-primary btn-sm" id="asbSubmit" type="button">Submit for Approval</button>
+          <button class="btn btn-outline btn-sm" id="asbClose" type="button">Close Scheme</button>
+        </div>
+      </div>
+
       <!-- Official Atria Scheme Header Banner -->
       <div class="card" style="margin-bottom: 16px; padding: 12px 20px; position: relative; min-height: 56px; background: #ffffff;">
         <div style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%);">
@@ -1304,6 +1356,46 @@
 
   </div><!-- /#appMainView -->
 
-  <script src="app.js"></script>
+  <!-- Create New Scheme -->
+<div id="schemeCreateModal" class="ws-modal">
+  <div class="ws-modal-card">
+    <h3 class="ws-modal-title">Create New Scheme</h3>
+    <p class="ws-modal-sub">Set the academic context first. You can add courses in the editor.</p>
+    <label class="ws-field">Department
+      <select id="csDept" class="form-input"></select>
+    </label>
+    <label class="ws-field">Semester
+      <select id="csSem" class="form-input"></select>
+    </label>
+    <label class="ws-field">Academic Year
+      <input id="csYear" class="form-input" value="2026-27" placeholder="2026-27">
+    </label>
+    <label class="ws-field">Regulation
+      <input id="csReg" class="form-input" value="2024" placeholder="2024">
+    </label>
+    <label class="ws-field">Scheme name (optional)
+      <input id="csName" class="form-input" placeholder="CSE Semester V">
+    </label>
+    <p id="csError" class="ws-error"></p>
+    <div class="ws-modal-actions">
+      <button id="csCancel" class="btn btn-outline" type="button">Cancel</button>
+      <button id="csCreate" class="btn btn-primary" type="button">Create &amp; Open Editor</button>
+    </div>
+  </div>
+</div>
+
+<!-- Version history -->
+<div id="versionsModal" class="ws-modal">
+  <div class="ws-modal-card ws-modal-wide">
+    <h3 class="ws-modal-title" id="versionsTitle">Version History</h3>
+    <div id="versionsBody" class="ws-versions"></div>
+    <div class="ws-modal-actions">
+      <button id="versionsClose" class="btn btn-outline" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script src="schemes-ui.js"></script>
 </body>
 </html>

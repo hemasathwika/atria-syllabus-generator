@@ -157,3 +157,63 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE INDEX IF NOT EXISTS idx_users_role ON users (role);
 CREATE INDEX IF NOT EXISTS idx_users_dept ON users (department_code);
+
+-- ---------------------------------------------------------------------------
+-- Scheme lifecycle (2026-11): a scheme is a first-class, owned document.
+-- Rows reference departments/users by code and email rather than by id because
+-- save_state() rewrites those tables on every whole-state save.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS schemes (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    uuid            TEXT    NOT NULL UNIQUE,
+    name            TEXT    NOT NULL,
+    department_code TEXT    NOT NULL,
+    semester        TEXT    NOT NULL,
+    academic_year   TEXT    NOT NULL DEFAULT '',
+    regulation      TEXT    NOT NULL DEFAULT '',
+    status          TEXT    NOT NULL DEFAULT 'Draft',
+    owner_email     TEXT    NOT NULL,
+    visibility      TEXT    NOT NULL DEFAULT 'personal',
+    source_uuid     TEXT    NOT NULL DEFAULT '',
+    submitted_at    TEXT    NOT NULL DEFAULT '',
+    decided_at      TEXT    NOT NULL DEFAULT '',
+    decided_by      TEXT    NOT NULL DEFAULT '',
+    created_at      TEXT    NOT NULL,
+    updated_at      TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_schemes_owner ON schemes (owner_email, status);
+CREATE INDEX IF NOT EXISTS idx_schemes_scope ON schemes (department_code, semester, academic_year);
+
+CREATE TABLE IF NOT EXISTS scheme_courses (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    scheme_id   INTEGER NOT NULL REFERENCES schemes (id) ON DELETE CASCADE,
+    sl_no       INTEGER NOT NULL DEFAULT 0,
+    type        TEXT    NOT NULL DEFAULT '',
+    code        TEXT    NOT NULL DEFAULT '',
+    title       TEXT    NOT NULL DEFAULT '',
+    td          TEXT    NOT NULL DEFAULT '',
+    psb         TEXT    NOT NULL DEFAULT '',
+    l           INTEGER NOT NULL DEFAULT 0,
+    t           INTEGER NOT NULL DEFAULT 0,
+    p           INTEGER NOT NULL DEFAULT 0,
+    s           INTEGER NOT NULL DEFAULT 0,
+    tot         INTEGER NOT NULL DEFAULT 0,
+    exam_hours  TEXT    NOT NULL DEFAULT '',
+    cia         INTEGER NOT NULL DEFAULT 0,
+    see         INTEGER NOT NULL DEFAULT 0,
+    total       INTEGER NOT NULL DEFAULT 0,
+    credits     INTEGER NOT NULL DEFAULT 0,
+    position    INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_scheme_courses ON scheme_courses (scheme_id, position);
+
+CREATE TABLE IF NOT EXISTS scheme_versions (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    scheme_id   INTEGER NOT NULL REFERENCES schemes (id) ON DELETE CASCADE,
+    version_no  INTEGER NOT NULL,
+    snapshot    TEXT    NOT NULL,
+    note        TEXT    NOT NULL DEFAULT '',
+    created_by  TEXT    NOT NULL DEFAULT '',
+    created_at  TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_scheme_versions ON scheme_versions (scheme_id, version_no DESC);

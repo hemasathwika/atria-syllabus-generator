@@ -295,6 +295,28 @@
         "can_edit": true,
         "can_manage_faculty": true,
         "badge_color": "#1e3a8a"
+      },
+      {
+        "id": "HOD-CSE-01",
+        "name": "Dr. Devi Prasad",
+        "title": "Head of Department",
+        "email": "hod_cse@atria.edu.in",
+        "password": "hod@123",
+        "role": "HOD",
+        "can_edit": true,
+        "can_manage_faculty": true,
+        "badge_color": "#0f766e"
+      },
+      {
+        "id": "DEAN-01",
+        "name": "Dean Academics",
+        "title": "Dean (Academics)",
+        "email": "dean_academics@atria.edu.in",
+        "password": "dean@123",
+        "role": "DEAN",
+        "can_edit": true,
+        "can_manage_faculty": true,
+        "badge_color": "#7c3aed"
       }
     ],
     "faculty_roster": [
