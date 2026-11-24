@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Autonomous Curriculum Portal - Scheme & Syllabus Engineering</title>
-  <link rel="stylesheet" href="style.css?v=20261124f">
+  <link rel="stylesheet" href="style.css?v=20261124i">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -554,8 +554,6 @@
           <div class="ws-filters">
             <select id="wsFilterDept" class="ws-select"><option value="">All departments</option></select>
             <select id="wsFilterSem" class="ws-select"><option value="">All semesters</option></select>
-            <select id="wsFilterYear" class="ws-select"><option value="">All academic years</option></select>
-            <select id="wsFilterReg" class="ws-select"><option value="">All regulations</option></select>
             <select id="wsFilterStatus" class="ws-select"><option value="">All statuses</option></select>
             <button id="wsClearFilters" class="btn btn-outline" type="button">Clear</button>
           </div>
@@ -1408,7 +1406,9 @@
   </div>
 </div>
 
-<script src="app.js?v=20261124f"></script>
-<script src="schemes-ui.js?v=20261124f"></script>
+<div id="wsMenu" class="ws-menu" hidden></div>
+
+<script src="app.js?v=20261124i"></script>
+<script src="schemes-ui.js?v=20261124i"></script>
 </body>
 </html>

@@ -1491,3 +1491,113 @@ textarea:focus {
 .ws-icon-btn.is-danger:hover { border-color: #b91c1c; background: #fef2f2; }
 .ws-icon-btn[disabled], .ws-icon-btn.is-disabled { opacity: .35; cursor: not-allowed; background: #f8fafc; }
 .ws-icon-btn[disabled]:hover { border-color: var(--border); background: #f8fafc; }
+
+/* ==========================================================================
+   Simplified skin (Nov 2026)
+   Flat surfaces, lighter borders, tighter rhythm, smaller type scale.
+   Pure overrides: delete this block to return to the previous look.
+   ========================================================================== */
+:root {
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, .04);
+  --shadow: 0 1px 2px rgba(15, 23, 42, .05);
+  --shadow-md: 0 1px 3px rgba(15, 23, 42, .06);
+  --shadow-lg: 0 2px 8px -4px rgba(15, 23, 42, .12);
+  --radius: 8px;
+  --radius-lg: 10px;
+}
+
+body { background: #f7f8fa; }
+
+.navbar {
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  border-top: 0;
+  padding: 10px 20px;
+}
+
+.welcome-banner {
+  background: linear-gradient(rgba(11, 43, 42, .88), rgba(11, 43, 42, .88)),
+              url('assets/atria_campus_bg.jpg') center 30% / cover no-repeat;
+  box-shadow: none;
+  border: 0;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.card, .dash-card, .metric-card, .table-card, .ws-shell, .ws-modal-card {
+  box-shadow: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+}
+
+.dash-card, .metric-card { padding: 14px 16px; }
+.dash-card:hover, .metric-card:hover { box-shadow: none; transform: none; }
+
+.card-header, .pane-header { padding: 14px 16px; }
+
+.data-table th, .ws-table th {
+  background: #f9fafb;
+  color: #6b7280;
+  font-size: 10.5px;
+  letter-spacing: .05em;
+  padding: 8px 10px;
+  border-color: #eef1f4;
+}
+
+.data-table td, .ws-table td {
+  padding: 8px 10px;
+  border-color: #eef1f4;
+}
+
+.data-table tr:hover td, .ws-table tr:hover td { background: #fcfdfe; }
+
+.btn { box-shadow: none; border-radius: 8px; }
+
+.ws-shell { padding: 16px; }
+.ws-head { margin-bottom: 10px; }
+.ws-sub { font-size: 12px; }
+.ws-card { padding: 14px; box-shadow: none; }
+.ws-card:hover { box-shadow: none; border-color: var(--primary); }
+.ws-filters { gap: 6px; margin-bottom: 10px; }
+.ws-select, .ws-search { font-size: 12px; padding: 6px 9px; }
+.ws-badge { font-size: 10.5px; padding: 2px 8px; }
+.ws-icon-btn { width: 26px; height: 26px; border-color: transparent; font-size: 13px; }
+.ws-icon-btn:hover { background: #f1f5f9; border-color: transparent; }
+.ws-icon-btn.is-primary { border-color: var(--primary); }
+.ws-cell-sub { font-size: 10.5px; color: #94a3b8; margin-top: 2px; }
+
+.ws-menu {
+  position: fixed;
+  z-index: 2000;
+  min-width: 200px;
+  padding: 4px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px -12px rgba(15, 23, 42, .35);
+}
+
+.ws-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: 0;
+  background: none;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: #334155;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ws-menu button:hover { background: #f1f5f9; }
+.ws-menu button.danger { color: #b91c1c; }
+.ws-menu-icon { width: 16px; text-align: center; }
+.ws-listhead { padding-right: 2px; }
+.ws-listhead .ws-search { flex: 0 1 300px; max-width: 300px; min-width: 180px; margin-left: auto; box-sizing: border-box; }

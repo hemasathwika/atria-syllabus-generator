@@ -91,7 +91,7 @@
 
   function query() {
     const params = new URLSearchParams({ scope: scope });
-    const map = { department: 'wsFilterDept', semester: 'wsFilterSem', academic_year: 'wsFilterYear', regulation: 'wsFilterReg', status: 'wsFilterStatus' };
+    const map = { department: 'wsFilterDept', semester: 'wsFilterSem', status: 'wsFilterStatus' };
     Object.keys(map).forEach((key) => {
       const el = $(map[key]);
       if (el && el.value) params.set(key, el.value);
@@ -163,9 +163,9 @@
     const mine = scope === 'mine';
     const approvals = scope === 'approvals';
     $('wsHeadRow').innerHTML = (mine || approvals)
-      ? '<th>Scheme</th><th>Department</th><th>Semester</th>' + (approvals ? '<th>Submitted By</th>' : '<th>Academic Year</th><th>Regulation</th>') +
-        '<th>Courses</th><th>Status</th><th>Last Modified</th><th>Actions</th>'
-      : '<th>Scheme</th><th>Department</th><th>Semester</th><th>Academic Year</th><th>Regulation</th><th>Created By</th><th>Last Updated</th><th>Actions</th>';
+      ? '<th>Scheme</th>' + (approvals ? '<th>Submitted By</th>' : '<th>Year</th>') +
+        '<th>Status</th><th>Updated</th><th></th>'
+      : '<th>Scheme</th><th>Created By</th><th>Updated</th><th></th>';
 
     const rows = (data[scope] || []).filter(matchesSearch);
     const body = $('wsBody');
@@ -202,12 +202,11 @@
       parts.push(iconBtn({ act: 'dean_changes', uuid: s.uuid, icon: '↩️', label: 'Request changes', variant: 'is-danger' }));
     }
     return '<tr>' +
-      '<td><button class="ws-link" data-act="preview" data-uuid="' + s.uuid + '">' + esc(s.name) + '</button></td>' +
-      '<td>' + esc(s.department_code) + '</td>' +
-      '<td>' + esc(s.semester) + '</td>' +
+      '<td><button class="ws-link" data-act="preview" data-uuid="' + s.uuid + '">' + esc(s.name) + '</button>' +
+        '<div class="ws-cell-sub">' + esc(s.department_code) + ' · Sem ' + esc(s.semester) +
+        ' · ' + (s.course_count || 0) + ' courses</div></td>' +
       '<td>' + esc(s.owner_email) + '</td>' +
-      '<td>' + (s.course_count || 0) + ' · ' + (s.credits || 0) + ' cr</td>' +
-      '<td>' + badge(s.status) + mailTag(s) + '</td>' +
+      '<td>' + badge(s.status) + '</td>' +
       '<td>' + fmtDate(s.updated_at) + '</td>' +
       '<td class="ws-actions">' + parts.join('') + '</td>' +
       '</tr>';
@@ -229,6 +228,14 @@
     const editable = EDITABLE.includes(s.status);
     const parts = [];
 
+    parts.push(iconBtn({
+      act: 'open', uuid: s.uuid, icon: '✏️',
+      label: editable ? 'Edit scheme' : 'Edit unavailable — ' + s.status + ' schemes cannot be edited',
+      disabled: !editable
+    }));
+    parts.push(iconBtn({ act: 'preview', uuid: s.uuid, icon: '👁️', label: 'Preview scheme' }));
+    parts.push(iconBtn({ act: 'download', uuid: s.uuid, icon: '⬇️', label: 'Download Word (.docx)' }));
+
     if (editable) {
       parts.push(iconBtn({
         act: 'submit', uuid: s.uuid, icon: '📤', variant: 'is-primary',
@@ -236,27 +243,7 @@
       }));
     }
 
-    parts.push(iconBtn({
-      act: 'open', uuid: s.uuid, icon: '✏️',
-      label: editable ? 'Edit scheme' : 'Edit unavailable — ' + s.status + ' schemes cannot be edited',
-      disabled: !editable
-    }));
-
-    parts.push(iconBtn({ act: 'preview', uuid: s.uuid, icon: '👁️', label: 'Preview scheme' }));
-    parts.push(iconBtn({ act: 'download', uuid: s.uuid, icon: '⬇️', label: 'Download Word (.docx)' }));
-    parts.push(iconBtn({ act: 'print', uuid: s.uuid, icon: '🖨️', label: 'Print scheme' }));
-
-    if (s.status === 'Approved') {
-      parts.push(iconBtn({ act: 'email', uuid: s.uuid, icon: '✉️', label: 'Email the approved copy' }));
-    }
-
-    parts.push(iconBtn({
-      act: 'delete', uuid: s.uuid, icon: '🗑️', variant: 'is-danger',
-      label: s.status === 'Approved'
-        ? 'Delete this approved scheme (also removes its version history)'
-        : 'Delete this scheme'
-    }));
-
+    parts.push(iconBtn({ act: 'menu', uuid: s.uuid, icon: '⋯', label: 'More actions' }));
     return parts.join('');
   }
 
@@ -269,12 +256,11 @@
 
   function mineRow(s) {
     return '<tr>' +
-      '<td><button class="ws-link" data-act="open" data-uuid="' + s.uuid + '">' + esc(s.name) + '</button></td>' +
-      '<td>' + esc(s.department_code) + '</td>' +
-      '<td>' + esc(s.semester) + '</td>' +
+      '<td><button class="ws-link" data-act="open" data-uuid="' + s.uuid + '">' + esc(s.name) + '</button>' +
+        '<div class="ws-cell-sub">' + esc(s.department_code) + ' · Sem ' + esc(s.semester) +
+        (s.regulation ? ' · Reg ' + esc(s.regulation) : '') +
+        ' · ' + (s.course_count || 0) + ' courses</div></td>' +
       '<td>' + esc(s.academic_year || '—') + '</td>' +
-      '<td>' + esc(s.regulation || '—') + '</td>' +
-      '<td>' + (s.course_count || 0) + ' · ' + (s.credits || 0) + ' cr</td>' +
       '<td>' + badge(s.status) + mailTag(s) + '</td>' +
       '<td>' + fmtDate(s.updated_at) + '</td>' +
       '<td class="ws-actions">' + ownerActions(s) + '</td>' +
@@ -283,11 +269,9 @@
 
   function availableRow(s) {
     return '<tr>' +
-      '<td><button class="ws-link" data-act="view" data-uuid="' + s.uuid + '">' + esc(s.name) + '</button></td>' +
-      '<td>' + esc(s.department_code) + '</td>' +
-      '<td>' + esc(s.semester) + '</td>' +
-      '<td>' + esc(s.academic_year || '—') + '</td>' +
-      '<td>' + esc(s.regulation || '—') + '</td>' +
+      '<td><button class="ws-link" data-act="view" data-uuid="' + s.uuid + '">' + esc(s.name) + '</button>' +
+        '<div class="ws-cell-sub">' + esc(s.department_code) + ' · Sem ' + esc(s.semester) +
+        (s.academic_year ? ' · ' + esc(s.academic_year) : '') + '</div></td>' +
       '<td>' + esc(s.owner_email || '—') + '</td>' +
       '<td>' + fmtDate(s.updated_at) + '</td>' +
       '<td class="ws-actions">' +
@@ -435,6 +419,49 @@
     }
   }
 
+  async function runAction(act, uuid) {
+    try {
+      if (act === 'open' || act === 'view') await openEditor(uuid, act === 'view');
+      else if (act === 'preview') await preview(uuid);
+      else if (['hod_forward', 'hod_changes', 'dean_approve', 'dean_changes'].includes(act)) {
+        await transition(uuid, act);
+        await load();
+      }
+      else if (act === 'download') download(uuid);
+      else if (act === 'print') print(uuid);
+      else if (act === 'copy') await copyScheme(uuid);
+      else if (act === 'delete') await deleteScheme(uuid);
+      else if (act === 'email') await emailCopy(uuid);
+      else if (act === 'submit') await submitScheme(uuid);
+    } catch (e) {
+      alert(e.message);
+    }
+  }
+
+  function menuItems(s) {
+    const items = [{ act: 'print', icon: '🖨️', label: 'Print scheme' }];
+    if (s.status === 'Approved') items.push({ act: 'email', icon: '✉️', label: 'Email approved copy' });
+    items.push({ act: 'delete', icon: '🗑️', label: 'Delete scheme', danger: true });
+    return items;
+  }
+
+  function openRowMenu(anchorBtn, scheme) {
+    const menu = $('wsMenu');
+    menu.innerHTML = menuItems(scheme).map((i) =>
+      '<button type="button" class="' + (i.danger ? 'danger' : '') + '" data-act="' + i.act + '" data-uuid="' + scheme.uuid + '">' +
+      '<span class="ws-menu-icon">' + i.icon + '</span>' + esc(i.label) + '</button>').join('');
+    const r = anchorBtn.getBoundingClientRect();
+    const width = 200;
+    menu.hidden = false;
+    menu.style.top = (r.bottom + 6) + 'px';
+    menu.style.left = Math.max(8, Math.min(r.right - width, window.innerWidth - width - 8)) + 'px';
+  }
+
+  function closeRowMenu() {
+    const menu = $('wsMenu');
+    if (menu) menu.hidden = true;
+  }
+
   // ---------------------------------------------------------------- wiring
   function wire() {
     document.querySelectorAll('.ws-card').forEach((card) => {
@@ -445,12 +472,13 @@
 
     $('wsSearch').addEventListener('input', (e) => { searchTerm = e.target.value.trim(); render(); });
 
-    ['wsFilterDept', 'wsFilterSem', 'wsFilterYear', 'wsFilterReg', 'wsFilterStatus'].forEach((id) => {
-      $(id).addEventListener('change', load);
+    ['wsFilterDept', 'wsFilterSem', 'wsFilterStatus'].forEach((id) => {
+      const el = $(id);
+      if (el) el.addEventListener('change', load);
     });
 
     $('wsClearFilters').addEventListener('click', () => {
-      ['wsFilterDept', 'wsFilterSem', 'wsFilterYear', 'wsFilterReg', 'wsFilterStatus'].forEach((id) => { $(id).value = ''; });
+      ['wsFilterDept', 'wsFilterSem', 'wsFilterStatus'].forEach((id) => { const el = $(id); if (el) el.value = ''; });
       searchTerm = '';
       $('wsSearch').value = '';
       load();
@@ -467,25 +495,27 @@
     $('wsBody').addEventListener('click', async (event) => {
       const btn = event.target.closest('[data-act]');
       if (!btn) return;
-      const uuid = btn.dataset.uuid;
-      const act = btn.dataset.act;
-      try {
-        if (act === 'open' || act === 'view') await openEditor(uuid, act === 'view');
-        else if (act === 'preview') await preview(uuid);
-        else if (['hod_forward', 'hod_changes', 'dean_approve', 'dean_changes'].includes(act)) {
-          await transition(uuid, act);
-          await load();
-        }
-        else if (act === 'download') download(uuid);
-        else if (act === 'print') print(uuid);
-        else if (act === 'copy') await copyScheme(uuid);
-        else if (act === 'delete') await deleteScheme(uuid);
-        else if (act === 'email') await emailCopy(uuid);
-        else if (act === 'submit') await submitScheme(uuid);
-      } catch (e) {
-        alert(e.message);
+      if (btn.dataset.act === 'menu') {
+        const scheme = findScheme(btn.dataset.uuid);
+        if (scheme) openRowMenu(btn, scheme);
+        return;
       }
+      await runAction(btn.dataset.act, btn.dataset.uuid);
     });
+
+    const menuEl = $('wsMenu');
+    if (menuEl) {
+      menuEl.addEventListener('click', async (event) => {
+        const item = event.target.closest('[data-act]');
+        if (!item) return;
+        closeRowMenu();
+        await runAction(item.dataset.act, item.dataset.uuid);
+      });
+    }
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('#wsMenu') && !event.target.closest('[data-act="menu"]')) closeRowMenu();
+    });
+    window.addEventListener('scroll', closeRowMenu, true);
 
     document.querySelectorAll('.ws-modal').forEach((m) => {
       m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('open'); });
@@ -515,7 +545,11 @@
   function init() {
     if (!app() || !app().user || !app().user.email) return;
     const email = app().user.email;
-    if (!wired) { wire(); wired = true; }
+    if (!wired) {
+      // A throwing listener must not blank the whole tab: log it, keep going.
+      try { wire(); } catch (e) { console.error('Workspace wiring failed', e); }
+      wired = true;
+    }
     if (email !== lastEmail) {
       lastEmail = email;
       // Never force the list visible while a scheme is open for editing.
