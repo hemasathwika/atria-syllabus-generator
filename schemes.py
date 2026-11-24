@@ -285,9 +285,9 @@ def delete_scheme(conn, user, scheme_uuid):
     is_owner = scheme['owner_email'] == (user or {}).get('email', '')
     if not is_owner and (user or {}).get('role') != 'ADMIN':
         raise PermissionError('Only the owner can delete this scheme')
-    if scheme['status'] not in (STATUS_DRAFT, STATUS_CHANGES_HOD, STATUS_CHANGES_DEAN) \
-            and (user or {}).get('role') != 'ADMIN':
-        raise PermissionError('Only drafts can be deleted')
+    # Any status may be deleted, approved documents included: the owner is
+    # allowed to withdraw a scheme from the record. Copies already mailed out
+    # stay with their recipients, which the UI warns about before deleting.
     conn.execute('DELETE FROM schemes WHERE id = ?', (scheme['id'],))
     conn.commit()
     return True

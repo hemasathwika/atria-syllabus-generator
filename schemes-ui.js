@@ -235,8 +235,9 @@
 
     parts.push(iconBtn({
       act: 'delete', uuid: s.uuid, icon: '🗑️', variant: 'is-danger',
-      label: editable ? 'Delete this draft' : 'Delete unavailable — only drafts can be deleted',
-      disabled: !editable
+      label: s.status === 'Approved'
+        ? 'Delete this approved scheme (also removes its version history)'
+        : 'Delete this scheme'
     }));
 
     return parts.join('');
@@ -336,7 +337,15 @@
   }
 
   async function deleteScheme(uuid) {
-    if (!confirm('Delete this draft? This cannot be undone from the dashboard.')) return;
+    let scheme = findScheme(uuid);
+    if (!scheme) {
+      try { scheme = await fetchScheme(uuid); } catch (e) { scheme = null; }
+    }
+    const name = scheme ? scheme.name : 'this scheme';
+    const warning = scheme && scheme.status === 'Approved'
+      ? 'Delete the APPROVED scheme "' + name + '"?\n\nThis removes the document and its version history from the portal. Copies already emailed to recipients cannot be recalled.'
+      : 'Delete "' + name + '"?\n\nThis removes the document and its version history.';
+    if (!confirm(warning)) return;
     await api('/api/schemes/' + uuid + '/delete', 'POST', {});
     await load();
     await loadCounts();
