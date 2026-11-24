@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const homeDeptName = document.getElementById('homeDeptName');
     if (homeDeptName) {
       if (isDeptBound) {
-        homeDeptName.innerHTML = `${dept.name} (${dept.code}) <span class="badge" style="background: #0f766e; color: #fff; font-size: 11px; margin-left: 6px;">🔒 Assigned Dept</span>`;
+        homeDeptName.innerHTML = `${dept.name} (${dept.code}) <span class="ov-inline-tag">Assigned dept</span>`;
       } else {
         homeDeptName.textContent = `${dept.name} (${dept.code})`;
       }
@@ -1891,11 +1891,11 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
 
     if (roleDesc) {
       if (currentUser.can_manage_faculty) {
-        roleDesc.textContent = `👑 Institutional Leadership Mode: Logged in as ${currentUser.name} (${currentUser.role}). Full authoring access and authority to appoint BoS faculty coordinators.`;
+        roleDesc.textContent = `Full authoring access · appoints BoS coordinators`;
       } else if (currentUser.can_edit) {
-        roleDesc.textContent = `✏️ Authorized BoS Coordinator Mode: Logged in as ${currentUser.name}. Full authoring access to design schemes and write course syllabi.`;
+        roleDesc.textContent = `Authoring access · schemes and syllabi`;
       } else {
-        roleDesc.textContent = `🔒 View-Only Mode: You can browse schemes, read syllabi, and export documents. Sign in with coordinator or leadership credentials to edit.`;
+        roleDesc.textContent = `View-only · browse and export`;
       }
     }
 
@@ -1929,10 +1929,10 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
     const metricCourses = document.getElementById('metricCoursesCount');
     const metricFac = document.getElementById('metricFacultyCount');
 
-    if (metricReg) metricReg.textContent = dept.regulations || '2024 Scheme';
-    if (metricSem) metricSem.textContent = '8 Semesters (I–VIII)';
-    if (metricCourses) metricCourses.textContent = `${totalCoursesCount} Active Courses`;
-    if (metricFac) metricFac.textContent = `${authCount} / ${roster.length} Authorized`;
+    if (metricReg) metricReg.textContent = (dept.regulations || '2024').toString().replace(/\s*Scheme$/i, '');
+    if (metricSem) metricSem.textContent = '8';
+    if (metricCourses) metricCourses.textContent = `${totalCoursesCount}`;
+    if (metricFac) metricFac.textContent = `${authCount}/${roster.length}`;
   }
 
   // 5. Semester Selector

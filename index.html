@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Autonomous Curriculum Portal - Scheme & Syllabus Engineering</title>
-  <link rel="stylesheet" href="style.css?v=20261124j">
+  <link rel="stylesheet" href="style.css?v=20261124m">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -262,249 +262,101 @@
     <!-- TAB 0: HOME / GUIDED DASHBOARD OVERVIEW     -->
     <!-- ========================================== -->
     <section id="tab-home" class="tab-pane active">
+      <div class="ov-head">
+        <div class="ov-head-main">
+          <p class="ov-eyebrow">Overview</p>
+          <h1 class="ov-title"><span id="homeGreetingName">Welcome</span></h1>
+          <p class="ov-meta">
+            <span id="homeRoleBadge" class="ov-chip">VIEW-ONLY</span>
+            <span id="homeDeptName" class="ov-meta-item">All Departments</span>
+            <span id="homeRoleDesc" class="ov-meta-item">View-only access</span>
+          </p>
+        </div>
+        <div class="ov-head-actions">
+          <button type="button" class="btn btn-outline btn-sm" id="btnHomeQuickManageAccess">Manage access</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btnHomeQuickLogin">Switch account</button>
+        </div>
+      </div>
 
-      <!-- 1. Executive Banner with Live Logged-in User Context -->
-      <div class="welcome-banner">
-        <div style="display: flex; gap: 18px; align-items: center;">
-          <div class="user-avatar-circle" id="homeAvatarCircle">
-            <span id="homeAvatarText">GV</span>
-          </div>
-          <div class="welcome-text">
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-              <h2 style="margin: 0; font-size: 20px;" id="homeGreetingName">Welcome, Guest Viewer</h2>
-              <span class="badge" id="homeRoleBadge" style="background: #e2e8f0; color: #334155;">VIEW-ONLY</span>
-            </div>
-            <p id="homeRoleDesc" style="margin: 0; font-size: 13px; color: #dbeafe;">
-              Viewing published curriculum for Computer Science & Engineering (2024 Scheme). Sign in with institutional credentials to enable authoring and governance.
-            </p>
+      <div class="ov-metrics">
+        <div class="ov-metric">
+          <span class="ov-metric-label">Regulation</span>
+          <span class="ov-metric-value" id="metricRegulation">—</span>
+        </div>
+        <div class="ov-metric">
+          <span class="ov-metric-label">Semesters</span>
+          <span class="ov-metric-value" id="metricSemesters">0</span>
+        </div>
+        <div class="ov-metric">
+          <span class="ov-metric-label">Courses</span>
+          <span class="ov-metric-value" id="metricCoursesCount">0</span>
+        </div>
+        <div class="ov-metric">
+          <span class="ov-metric-label">Faculty</span>
+          <span class="ov-metric-value" id="metricFacultyCount">0</span>
+        </div>
+      </div>
+
+      <div class="ov-section">
+        <div class="ov-section-head">
+          <div>
+            <h2>Workspace</h2>
+            <p>Prepare a scheme, build its syllabus, then produce the official document.</p>
           </div>
         </div>
-        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-          <div class="welcome-dept-tag">
-            <span>Active Department:</span>
-            <strong id="homeDeptName">Computer Science & Engineering (CSE)</strong>
+        <div class="ov-list">
+          <button class="ov-row" type="button" onclick="navigateToTab('tab-scheme')">
+            <span class="ov-row-index">01</span>
+            <span class="ov-row-body">
+              <strong>Scheme of Examination</strong>
+              <em>Draft the semester matrix, submit it for approval, track its status.</em>
+            </span>
+            <span class="ov-row-go">Open</span>
+          </button>
+          <button class="ov-row" type="button" onclick="navigateToTab('tab-syllabus')">
+            <span class="ov-row-index">02</span>
+            <span class="ov-row-body">
+              <strong>Course Syllabus Builder</strong>
+              <em>Course outcomes, modules, practicals and references, step by step.</em>
+            </span>
+            <span class="ov-row-go">Open</span>
+          </button>
+          <button class="ov-row" type="button" onclick="navigateToTab('tab-preview')">
+            <span class="ov-row-index">03</span>
+            <span class="ov-row-body">
+              <strong>Export &amp; Documents</strong>
+              <em>Preview in the official format, then download or print.</em>
+            </span>
+            <span class="ov-row-go">Open</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ov-section" id="adminDirectoryCard" style="display: none;">
+        <div class="ov-section-head ov-section-head-row">
+          <div>
+            <h2>Institutional accounts</h2>
+            <p>Visible to signed-in administrators only.</p>
           </div>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn btn-secondary btn-sm" id="btnHomeQuickLogin" style="background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.4); color: #fff;">🔐 Sign In / Switch Account</button>
-            <button class="btn btn-secondary btn-sm" id="btnHomeQuickManageAccess" style="display: none; background: #fbbf24; color: #78350f; font-weight: 700; border: none;">⚙️ Faculty Access</button>
+          <button type="button" class="btn btn-outline btn-sm" id="btnToggleDirPasswords">Show passwords</button>
+        </div>
+        <div class="ov-admin">
+          <div class="ov-admin-group">
+            <div class="ov-admin-label">Leadership &amp; administration</div>
+            <div id="dirLeadershipList" class="ov-admin-list"></div>
+          </div>
+          <div class="ov-admin-group">
+            <div class="ov-admin-label">Authorized coordinators</div>
+            <div id="dirCoordinatorList" class="ov-admin-list"></div>
+          </div>
+          <div class="ov-admin-group">
+            <div class="ov-admin-label">Faculty</div>
+            <div id="dirFacultyList" class="ov-admin-list"></div>
           </div>
         </div>
       </div>
 
-      <!-- 2. Institutional KPI Metrics Row (4 Cards) -->
-      <div class="dashboard-metrics-grid">
-        <div class="metric-card">
-          <div class="metric-icon" style="background: #eff6ff; color: #1e40af;">🎓</div>
-          <div>
-            <span class="metric-label">Curriculum Regulation</span>
-            <strong class="metric-val" id="metricRegulation">2024 Scheme</strong>
-            <span class="metric-sub">Autonomous College BoS Standard</span>
-          </div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-icon" style="background: #f0fdf4; color: #15803d;">📚</div>
-          <div>
-            <span class="metric-label">Program Coverage</span>
-            <strong class="metric-val" id="metricSemesters">8 Semesters</strong>
-            <span class="metric-sub">Semesters I through VIII</span>
-          </div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-icon" style="background: #faf5ff; color: #7e22ce;">📋</div>
-          <div>
-            <span class="metric-label">Course Catalog</span>
-            <strong class="metric-val" id="metricCoursesCount">18+ Courses</strong>
-            <span class="metric-sub">Core, Electives, Labs & Projects</span>
-          </div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-icon" style="background: #fffbeb; color: #b45309;">👥</div>
-          <div>
-            <span class="metric-label">Faculty Governance</span>
-            <strong class="metric-val" id="metricFacultyCount">4 / 12 Authorized</strong>
-            <span class="metric-sub">Appointed BoS Coordinators</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 3. Primary Workflows (Phase 1, Phase 2, Phase 3) -->
-      <div class="dashboard-cards-grid">
-        <div class="dash-card">
-          <div class="dash-card-icon" style="background: #eff6ff; color: #1e40af;">📋</div>
-          <div class="dash-card-content">
-            <span class="dash-step-badge">Phase 1</span>
-            <h3>Scheme of Examination</h3>
-            <p>Define semester-wise course matrix, credits, Student Learning Hours (SLT: L-T-P-S), and CIA / SEE marks distribution.</p>
-            <ul class="dash-feature-list">
-              <li>✓ 16-Column Autonomous university matrix</li>
-              <li>✓ SLT hours auto-sum (L+T+P+S = TOT)</li>
-              <li>✓ Real-time AICTE credit limits validation</li>
-            </ul>
-            <button class="btn btn-primary btn-block" onclick="navigateToTab('tab-scheme')">Open Scheme Generator ➔</button>
-          </div>
-        </div>
-
-        <div class="dash-card">
-          <div class="dash-card-icon" style="background: #ecfdf5; color: #047857;">✍️</div>
-          <div class="dash-card-content">
-            <span class="dash-step-badge" style="background: #d1fae5; color: #065f46;">Phase 2</span>
-            <h3>Course Syllabus Builder</h3>
-            <p>Step-by-step guided builder for Course Outcomes (COs), Bloom's levels (CL/PL), 5-Module contents, practicals, and textbooks.</p>
-            <ul class="dash-feature-list">
-              <li>✓ 6-Step guided wizard to prevent clutter</li>
-              <li>✓ 4-Way CO-Assessment mapping matrix</li>
-              <li>✓ Conventional & Open-ended practicals</li>
-            </ul>
-            <button class="btn btn-primary btn-block" style="background: #047857;" onclick="navigateToTab('tab-syllabus')">Open Syllabus Builder ➔</button>
-          </div>
-        </div>
-
-        <div class="dash-card">
-          <div class="dash-card-icon" style="background: #fdf4ff; color: #7e22ce;">🖨️</div>
-          <div class="dash-card-content">
-            <span class="dash-step-badge" style="background: #f3e8ff; color: #6b21a8;">Final Delivery</span>
-            <h3>Export & Documents</h3>
-            <p>Download separate Scheme Word files, subject-specific syllabi (.docx), or print official BoS accreditation booklets.</p>
-            <ul class="dash-feature-list">
-              <li>✓ Download Scheme & Syllabus separately</li>
-              <li>✓ Download specific subject syllabus (.docx)</li>
-              <li>✓ Clean PDF print view with exact borders</li>
-            </ul>
-            <button class="btn btn-secondary btn-block" onclick="navigateToTab('tab-preview')">View Official Documents ➔</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4. Curriculum Standards & Quick Resource Hub -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 24px;">
-        
-        <!-- Pillar 1: Autonomous Framework & OBE Guidelines -->
-        <div class="card" style="margin: 0;">
-          <div class="card-header-flex" style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 14px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 20px;">🎓</span>
-              <div>
-                <h3 style="margin: 0; font-size: 15px;">Autonomous OBE & Curriculum Guidelines</h3>
-                <p class="text-muted" style="margin: 2px 0 0; font-size: 11.5px;">Accreditation compliance standards under 2024 Scheme regulation.</p>
-              </div>
-            </div>
-            <span class="badge badge-active" style="font-size: 11px;">VTU Autonomous</span>
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
-            <div style="display: flex; align-items: flex-start; gap: 10px; background: #f8fafc; border: 1px solid var(--border); padding: 10px 12px; border-radius: 6px;">
-              <span style="font-size: 16px;">🎯</span>
-              <div>
-                <strong style="color: var(--text-main); font-size: 12.5px;">Outcome-Based Education (OBE)</strong>
-                <p style="margin: 2px 0 0; font-size: 11.5px; color: var(--text-muted); line-height: 1.4;">
-                  Standard 5-CO structure with cognitive (CL1–CL6) and psychomotor (PL1–PL3) levels mapped to CIE/SEE examinations.
-                </p>
-              </div>
-            </div>
-
-            <div style="display: flex; align-items: flex-start; gap: 10px; background: #f8fafc; border: 1px solid var(--border); padding: 10px 12px; border-radius: 6px;">
-              <span style="font-size: 16px;">⏱️</span>
-              <div>
-                <strong style="color: var(--text-main); font-size: 12.5px;">Student Learning Time (SLT)</strong>
-                <p style="margin: 2px 0 0; font-size: 11.5px; color: var(--text-muted); line-height: 1.4;">
-                  Formulated as Lecture (L) + Tutorial (T) + Practical (P) + Self-Study (S) = Total Hours, validated against AICTE credit limits.
-                </p>
-              </div>
-            </div>
-
-            <div style="display: flex; align-items: flex-start; gap: 10px; background: #f8fafc; border: 1px solid var(--border); padding: 10px 12px; border-radius: 6px;">
-              <span style="font-size: 16px;">⚖️</span>
-              <div>
-                <strong style="color: var(--text-main); font-size: 12.5px;">Equal Assessment Weightage</strong>
-                <p style="margin: 2px 0 0; font-size: 11.5px; color: var(--text-muted); line-height: 1.4;">
-                  Balanced 50 Marks Continuous Internal Evaluation (CIE) and 50 Marks Semester End Examination (SEE) for 100 total marks.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pillar 2: Quick Operations & Direct Actions -->
-        <div class="card" style="margin: 0; display: flex; flex-direction: column; justify-content: space-between;">
-          <div>
-            <div class="card-header-flex" style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 14px;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 20px;">⚡</span>
-                <div>
-                  <h3 style="margin: 0; font-size: 15px;">Quick Operations & Document Actions</h3>
-                  <p class="text-muted" style="margin: 2px 0 0; font-size: 11.5px;">Direct one-click access to active curriculum workspaces.</p>
-                </div>
-              </div>
-              <span class="badge" style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; font-size: 11px;">Active Workflows</span>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <button type="button" class="btn btn-outline" onclick="navigateToTab('tab-scheme')" style="padding: 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; border-color: var(--border);">
-                <div style="font-weight: 700; font-size: 13px; color: var(--primary);">📋 Open Scheme Matrix</div>
-                <div style="font-size: 11px; color: var(--text-muted);">Manage courses, SLT hours & credits</div>
-              </button>
-
-              <button type="button" class="btn btn-outline" onclick="navigateToTab('tab-syllabus')" style="padding: 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; border-color: var(--border);">
-                <div style="font-weight: 700; font-size: 13px; color: #047857;">✍️ Open Syllabus Builder</div>
-                <div style="font-size: 11px; color: var(--text-muted);">Configure 5 modules & outcomes</div>
-              </button>
-
-              <button type="button" class="btn btn-outline" onclick="navigateToTab('tab-preview')" style="padding: 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; border-color: var(--border);">
-                <div style="font-weight: 700; font-size: 13px; color: #7e22ce;">📄 Export Scheme (.docx)</div>
-                <div style="font-size: 11px; color: var(--text-muted);">Download official BoS Word format</div>
-              </button>
-
-              <button type="button" class="btn btn-outline" onclick="navigateToTab('tab-preview')" style="padding: 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 4px; border-color: var(--border);">
-                <div style="font-weight: 700; font-size: 13px; color: #b45309;">📖 Export Syllabus (.docx)</div>
-                <div style="font-size: 11px; color: var(--text-muted);">All subjects or single subject file</div>
-              </button>
-            </div>
-          </div>
-
-          <!-- Institutional Governance Footer Note -->
-          <div style="margin-top: 16px; background: #f1f5f9; border-radius: 6px; padding: 10px 14px; font-size: 11.5px; color: var(--text-muted); display: flex; align-items: center; justify-content: space-between;">
-            <span>🏛️ <strong>Governance:</strong> Managed by Department BoS & Academic Council</span>
-            <span style="font-weight: 600; color: var(--primary);">Regulation: 2024 Scheme</span>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- 5. ADMIN-ONLY: Institutional Accounts Directory (never rendered on the login gate) -->
-      <div class="card" id="adminDirectoryCard" style="display: none; margin-top: 24px;">
-        <div class="card-header-flex" style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 14px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 20px;">🔑</span>
-            <div>
-              <h3 style="margin: 0; font-size: 15px;">Institutional Accounts & Test Passwords</h3>
-              <p class="text-muted" style="margin: 2px 0 0; font-size: 11.5px;">Restricted to signed-in administrators. Use these credentials to test other roles.</p>
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="badge" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; font-size: 11px;">ADMIN ONLY</span>
-            <button type="button" class="btn btn-secondary btn-sm" id="btnToggleDirPasswords" style="font-size: 11.5px; padding: 4px 10px;">👁️ Show Passwords</button>
-          </div>
-        </div>
-
-        <div style="margin-bottom: 14px;">
-          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #1e40af; letter-spacing: 0.5px;">Institutional Leadership & Admin</div>
-          <div id="dirLeadershipList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px; margin-top: 8px;"></div>
-        </div>
-
-        <div style="margin-bottom: 14px;">
-          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #047857; letter-spacing: 0.5px;">Authorized BoS Coordinators</div>
-          <div id="dirCoordinatorList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px; margin-top: 8px;"></div>
-        </div>
-
-        <div>
-          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 0.5px;">General Faculty / Registered Viewers</div>
-          <div id="dirFacultyList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px; margin-top: 8px;"></div>
-        </div>
-
-        <p style="font-size: 11px; color: var(--text-muted); margin: 14px 0 0;">
-          ⚠️ Stored in plain text inside <code>data/default_data.json</code>. Replace with a real password hash before deploying this portal beyond local use.
-        </p>
-      </div>
+      <span id="homeAvatarText" hidden></span>
     </section>
 
     <!-- ========================================== -->
@@ -1410,7 +1262,7 @@
 
 <div id="wsMenu" class="ws-menu" hidden></div>
 
-<script src="app.js?v=20261124j"></script>
-<script src="schemes-ui.js?v=20261124j"></script>
+<script src="app.js?v=20261124m"></script>
+<script src="schemes-ui.js?v=20261124m"></script>
 </body>
 </html>
