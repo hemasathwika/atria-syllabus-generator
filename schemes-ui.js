@@ -186,14 +186,14 @@
 
   function approvalRow(s) {
     const role = (user().role || '');
-    const parts = ['<button class="ws-act" data-act="preview" data-uuid="' + s.uuid + '">Preview</button>'];
+    const parts = [iconBtn({ act: 'preview', uuid: s.uuid, icon: '👁️', label: 'Preview scheme' })];
     if (s.status === 'Pending HOD' && (role === 'HOD' || role === 'ADMIN')) {
-      parts.push('<button class="ws-act ws-primary" data-act="hod_forward" data-uuid="' + s.uuid + '">Forward to Dean</button>');
-      parts.push('<button class="ws-act ws-danger" data-act="hod_changes" data-uuid="' + s.uuid + '">Request Changes</button>');
+      parts.push(iconBtn({ act: 'hod_forward', uuid: s.uuid, icon: '➡️', label: 'Forward to Dean', variant: 'is-primary' }));
+      parts.push(iconBtn({ act: 'hod_changes', uuid: s.uuid, icon: '↩️', label: 'Request changes', variant: 'is-danger' }));
     }
     if (s.status === 'Pending Dean' && (role === 'DEAN' || role === 'ADMIN')) {
-      parts.push('<button class="ws-act ws-primary" data-act="dean_approve" data-uuid="' + s.uuid + '">Approve</button>');
-      parts.push('<button class="ws-act ws-danger" data-act="dean_changes" data-uuid="' + s.uuid + '">Request Changes</button>');
+      parts.push(iconBtn({ act: 'dean_approve', uuid: s.uuid, icon: '✅', label: 'Approve scheme', variant: 'is-primary' }));
+      parts.push(iconBtn({ act: 'dean_changes', uuid: s.uuid, icon: '↩️', label: 'Request changes', variant: 'is-danger' }));
     }
     return '<tr>' +
       '<td><button class="ws-link" data-act="preview" data-uuid="' + s.uuid + '">' + esc(s.name) + '</button></td>' +
@@ -207,23 +207,38 @@
       '</tr>';
   }
 
+  function iconBtn(opts) {
+    const cls = 'ws-icon-btn' + (opts.variant ? ' ' + opts.variant : '') + (opts.disabled ? ' is-disabled' : '');
+    return '<button type="button" class="' + cls + '" data-act="' + opts.act + '" data-uuid="' + opts.uuid + '"' +
+      ' title="' + esc(opts.label) + '" aria-label="' + esc(opts.label) + '"' +
+      (opts.disabled ? ' disabled' : '') + '>' + opts.icon + '</button>';
+  }
+
   function ownerActions(s) {
+    const editable = EDITABLE.includes(s.status);
     const parts = [];
-    if (EDITABLE.includes(s.status)) {
-      parts.push('<button class="ws-act" data-act="open" data-uuid="' + s.uuid + '">Edit</button>');
-    } else {
-      parts.push('<button class="ws-act" data-act="open" data-uuid="' + s.uuid + '">Open</button>');
-    }
-    parts.push('<button class="ws-act" data-act="preview" data-uuid="' + s.uuid + '">Preview</button>');
-    parts.push('<button class="ws-act" data-act="download" data-uuid="' + s.uuid + '">DOCX</button>');
-    parts.push('<button class="ws-act" data-act="print" data-uuid="' + s.uuid + '">Print</button>');
-    parts.push('<button class="ws-act" data-act="versions" data-uuid="' + s.uuid + '">Versions</button>');
+
+    parts.push(iconBtn({
+      act: 'open', uuid: s.uuid, icon: '✏️',
+      label: editable ? 'Edit scheme' : 'Edit unavailable — ' + s.status + ' schemes cannot be edited',
+      disabled: !editable
+    }));
+
+    parts.push(iconBtn({ act: 'preview', uuid: s.uuid, icon: '👁️', label: 'Preview scheme' }));
+    parts.push(iconBtn({ act: 'download', uuid: s.uuid, icon: '⬇️', label: 'Download Word (.docx)' }));
+    parts.push(iconBtn({ act: 'print', uuid: s.uuid, icon: '🖨️', label: 'Print scheme' }));
+    parts.push(iconBtn({ act: 'versions', uuid: s.uuid, icon: '🕘', label: 'Version history' }));
+
     if (s.status === 'Approved') {
-      parts.push('<button class="ws-act" data-act="email" data-uuid="' + s.uuid + '">Email copy</button>');
+      parts.push(iconBtn({ act: 'email', uuid: s.uuid, icon: '✉️', label: 'Email the approved copy' }));
     }
-    if (EDITABLE.includes(s.status)) {
-      parts.push('<button class="ws-act ws-danger" data-act="delete" data-uuid="' + s.uuid + '">Delete</button>');
-    }
+
+    parts.push(iconBtn({
+      act: 'delete', uuid: s.uuid, icon: '🗑️', variant: 'is-danger',
+      label: editable ? 'Delete this draft' : 'Delete unavailable — only drafts can be deleted',
+      disabled: !editable
+    }));
+
     return parts.join('');
   }
 
@@ -258,9 +273,9 @@
       '<td>' + esc(s.owner_email || '—') + '</td>' +
       '<td>' + fmtDate(s.updated_at) + '</td>' +
       '<td class="ws-actions">' +
-        '<button class="ws-act" data-act="view" data-uuid="' + s.uuid + '">View</button>' +
-        '<button class="ws-act" data-act="preview" data-uuid="' + s.uuid + '">Preview</button>' +
-        '<button class="ws-act ws-primary" data-act="copy" data-uuid="' + s.uuid + '">Create My Copy</button>' +
+        iconBtn({ act: 'view', uuid: s.uuid, icon: '👁️', label: 'View scheme (read-only)' }) +
+        iconBtn({ act: 'preview', uuid: s.uuid, icon: '🔍', label: 'Preview scheme' }) +
+        iconBtn({ act: 'copy', uuid: s.uuid, icon: '⧉', label: 'Create my copy', variant: 'is-primary' }) +
       '</td>' +
       '</tr>';
   }
