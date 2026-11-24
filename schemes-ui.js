@@ -3,6 +3,15 @@
 (function () {
   'use strict';
 
+  window.addEventListener('error', function (event) {
+    const box = document.getElementById('wsError');
+    if (box) {
+      box.style.display = 'block';
+      box.textContent = 'Interface error: ' + (event.message || 'unknown') +
+        ' — hard refresh with Ctrl+F5.';
+    }
+  });
+
   const SEMESTERS = [
     ['I', '1'], ['II', '2'], ['III', '3'], ['IV', '4'],
     ['V', '5'], ['VI', '6'], ['VII', '7'], ['VIII', '8']
@@ -545,6 +554,9 @@
   function init() {
     if (!app() || !app().user || !app().user.email) return;
     const email = app().user.email;
+    const loading = $('wsLoading');
+    if (loading) loading.style.display = 'none';
+
     if (!wired) {
       // A throwing listener must not blank the whole tab: log it, keep going.
       try { wire(); } catch (e) { console.error('Workspace wiring failed', e); }

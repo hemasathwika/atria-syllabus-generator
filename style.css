@@ -1601,3 +1601,19 @@ body { background: #f7f8fa; }
 .ws-menu-icon { width: 16px; text-align: center; }
 .ws-listhead { padding-right: 2px; }
 .ws-listhead .ws-search { flex: 0 1 300px; max-width: 300px; min-width: 180px; margin-left: auto; box-sizing: border-box; }
+
+.ws-error-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  font-size: 12.5px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.ws-loading {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
