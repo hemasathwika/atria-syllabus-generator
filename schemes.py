@@ -119,7 +119,9 @@ def list_schemes(conn, user, scope='mine', filters=None):
             where.append("status = 'Pending HOD'")
             where.append("department_code = ?")
             args.append(dept)
-        elif role in ('DEAN', 'ADMIN'):
+        elif role == 'DEAN':
+            where.append("status = 'Pending Dean'")
+        elif role == 'ADMIN':
             where.append("status IN ('Pending Dean', 'Pending HOD')")
         else:
             where.append('0 = 1')
@@ -165,6 +167,13 @@ def list_schemes(conn, user, scope='mine', filters=None):
         item['courses'] = [_row(c) for c in courses]
         item['course_count'] = len(item['courses'])
         item['credits'] = sum(_int(c['credits']) for c in item['courses'])
+        # Resolve the reviewer here: the client never sees per-user departments.
+        hod = conn.execute(
+            "SELECT name FROM users WHERE role = 'HOD' AND department_code = ? LIMIT 1",
+            (item['department_code'],)).fetchone()
+        item['hod_name'] = hod[0] if hod else ''
+        dean = conn.execute("SELECT name FROM users WHERE role = 'DEAN' LIMIT 1").fetchone()
+        item['dean_name'] = dean[0] if dean else ''
         item.pop('id', None)
         items.append(item)
     return items
@@ -217,7 +226,7 @@ def _replace_courses(conn, scheme_id, courses):
             'tot, exam_hours, cia, see, total, credits, position) '
             'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             (scheme_id,
-             _int(course.get('sl_no')) or pos + 1,
+             _int(course.get('sl_no')) or _int(course.get('sl')) or pos + 1,
              _text(course.get('type')).upper(),
              _text(course.get('code')).upper(),
              _text(course.get('title')),
@@ -227,7 +236,8 @@ def _replace_courses(conn, scheme_id, courses):
              _int(course.get('tot')),
              _text(course.get('exam_hours')),
              _int(course.get('cia')), _int(course.get('see')), _int(course.get('total')),
-             _int(course.get('credits')),
+             # The editor still speaks the legacy 'c' key for credits.
+             _int(course.get('credits') if course.get('credits') not in (None, '') else course.get('c')),
              pos))
 
 
@@ -459,8 +469,34 @@ def to_dept_data(scheme):
     numbers = {'I': '1', 'II': '2', 'III': '3', 'IV': '4', 'V': '5', 'VI': '6',
                'VII': '7', 'VIII': '8'}
     sem_key = numbers.get(from_sem.upper(), from_sem)
+    # The exporter speaks the legacy key names (sl, c), the database speaks
+    # sl_no/credits. Normalise here so neither side has to know about the other.
+    courses = []
+    for idx, course in enumerate(scheme.get('courses') or []):
+        credits = course.get('credits')
+        if credits in (None, ''):
+            credits = course.get('c', 0)
+        courses.append({
+            'sl': course.get('sl_no') or course.get('sl') or idx + 1,
+            'type': course.get('type', ''),
+            'code': course.get('code', ''),
+            'title': course.get('title', ''),
+            'td': course.get('td', ''),
+            'psb': course.get('psb', ''),
+            'l': course.get('l', 0),
+            't': course.get('t', 0),
+            'p': course.get('p', 0),
+            's': course.get('s', 0),
+            'tot': course.get('tot', 0),
+            'exam_hours': course.get('exam_hours', ''),
+            'cia': course.get('cia', 0),
+            'see': course.get('see', 0),
+            'total': course.get('total', 0),
+            'c': credits or 0,
+        })
+
     return {
         'code': scheme.get('department_code', ''),
         'name': scheme.get('department_name') or scheme.get('department_code', ''),
-        'schemes': {sem_key: scheme.get('courses', [])},
+        'schemes': {sem_key: courses},
     }

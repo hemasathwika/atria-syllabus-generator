@@ -174,9 +174,16 @@
     if (!rows.length) {
       body.innerHTML = '';
       empty.style.display = 'block';
-      empty.innerHTML = mine
-        ? '<strong>No schemes yet.</strong><br>Use “Create New Scheme” to start one, or copy one from Available Schemes.'
-        : '<strong>Nothing shared yet.</strong><br>Schemes appear here once another faculty member’s scheme is approved.';
+      if (approvals) {
+        const role = (user().role || '');
+        empty.innerHTML = role === 'HOD'
+          ? '<strong>Nothing awaiting your review.</strong><br>Schemes appear here when a faculty member submits one.'
+          : '<strong>No schemes awaiting Dean approval.</strong><br>Schemes arrive here after the HOD forwards them.';
+      } else if (mine) {
+        empty.innerHTML = '<strong>No schemes yet.</strong><br>Use “Create New Scheme” to start one, or copy one from Available Schemes.';
+      } else {
+        empty.innerHTML = '<strong>Nothing shared yet.</strong><br>Schemes appear here once another faculty member’s scheme is approved.';
+      }
       return;
     }
     empty.style.display = 'none';
@@ -213,9 +220,21 @@
       (opts.disabled ? ' disabled' : '') + '>' + opts.icon + '</button>';
   }
 
+  function hodFor(scheme) {
+    if (scheme && scheme.hod_name) return scheme.hod_name;
+    return 'HOD, ' + ((scheme && scheme.department_code) || 'Department');
+  }
+
   function ownerActions(s) {
     const editable = EDITABLE.includes(s.status);
     const parts = [];
+
+    if (editable) {
+      parts.push(iconBtn({
+        act: 'submit', uuid: s.uuid, icon: '📤', variant: 'is-primary',
+        label: 'Submit to ' + hodFor(s) + ' (HOD) for review'
+      }));
+    }
 
     parts.push(iconBtn({
       act: 'open', uuid: s.uuid, icon: '✏️',
@@ -325,6 +344,19 @@
     await loadCounts();
     app().openSchemeEditor(body.scheme);
     await load();
+  }
+
+  async function submitScheme(uuid) {
+    const scheme = findScheme(uuid) || await fetchScheme(uuid);
+    const approver = hodFor(scheme);
+    const ok = confirm('Submit "' + scheme.name + '" to ' + approver +
+      ' (HOD, ' + scheme.department_code + ') for review?\n\n' +
+      'The scheme moves to "Pending HOD". You can still edit it if changes are requested.');
+    if (!ok) return;
+    await transition(uuid, 'submit');
+    alert('Submitted. ' + approver + ' will see it under Approvals.');
+    await load();
+    await loadCounts();
   }
 
   async function emailCopy(uuid) {
@@ -449,6 +481,7 @@
         else if (act === 'copy') await copyScheme(uuid);
         else if (act === 'delete') await deleteScheme(uuid);
         else if (act === 'email') await emailCopy(uuid);
+        else if (act === 'submit') await submitScheme(uuid);
       } catch (e) {
         alert(e.message);
       }

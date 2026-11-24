@@ -3272,7 +3272,14 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
       const dept = (appState.departments || []).find(d => d.code === scheme.department_code);
       if (dept) {
         dept.schemes = dept.schemes || {};
-        dept.schemes[key] = (scheme.courses || []).map(c => ({ ...c }));
+        // The editor works with the legacy shape ('c' for credits, 'sl' for the
+        // serial number). Normalise what the API returns so nothing silently
+        // renders as zero.
+        dept.schemes[key] = (scheme.courses || []).map((c, i) => ({
+          ...c,
+          sl: c.sl_no || c.sl || i + 1,
+          c: (c.credits === null || c.credits === undefined || c.credits === '') ? (c.c || 0) : c.credits
+        }));
       }
       const sel = document.getElementById('deptSelector');
       if (sel) sel.value = scheme.department_code;
