@@ -1,4 +1,4 @@
-/* Scheme workspace: My Schemes, Available Schemes, creation, approvals, versions.
+/* Scheme workspace: My Schemes, Available Schemes, creation, approvals.
    Talks to /api/schemes and drives the existing editor through window.AtriaApp. */
 (function () {
   'use strict';
@@ -20,8 +20,7 @@
   let scope = 'mine';
   let data = { mine: [], available: [] };
   let searchTerm = '';
-  let activeVersionsFor = null;
-
+  
   const $ = (id) => document.getElementById(id);
   const app = () => window.AtriaApp || null;
   const user = () => (app() && app().user) || {};
@@ -227,7 +226,6 @@
     parts.push(iconBtn({ act: 'preview', uuid: s.uuid, icon: '👁️', label: 'Preview scheme' }));
     parts.push(iconBtn({ act: 'download', uuid: s.uuid, icon: '⬇️', label: 'Download Word (.docx)' }));
     parts.push(iconBtn({ act: 'print', uuid: s.uuid, icon: '🖨️', label: 'Print scheme' }));
-    parts.push(iconBtn({ act: 'versions', uuid: s.uuid, icon: '🕘', label: 'Version history' }));
 
     if (s.status === 'Approved') {
       parts.push(iconBtn({ act: 'email', uuid: s.uuid, icon: '✉️', label: 'Email the approved copy' }));
@@ -383,32 +381,6 @@
     preview(uuid).then(() => setTimeout(() => window.print(), 400));
   }
 
-  async function showVersions(uuid) {
-    activeVersionsFor = uuid;
-    const scheme = findScheme(uuid) || await fetchScheme(uuid);
-    $('versionsTitle').textContent = 'Version History — ' + (scheme.name || '');
-    const body = await api('/api/schemes/' + uuid + '/versions');
-    const items = body.items || [];
-    $('versionsBody').innerHTML = items.length ? items.map((v) => (
-      '<div class="ws-version-row">' +
-        '<div><strong>v' + v.version_no + '</strong> · ' + esc(v.note || '') + '</div>' +
-        '<div class="ws-version-meta">' + fmtDate(v.created_at) + ' · ' + esc(v.created_by || '') + '</div>' +
-        (EDITABLE.includes((scheme || {}).status || '')
-          ? '<button class="ws-act" data-act="restore" data-version="' + v.version_no + '">Restore</button>' : '') +
-      '</div>'
-    )).join('') : '<p class="ws-empty-inline">No saved versions yet.</p>';
-    openModal('versionsModal');
-  }
-
-  async function restore(versionNo) {
-    if (!confirm('Restore version ' + versionNo + '? The current version is kept in history.')) return;
-    await api('/api/schemes/' + activeVersionsFor + '/restore', 'POST', { version_no: versionNo });
-    closeModal('versionsModal');
-    await load();
-    const scheme = await fetchScheme(activeVersionsFor);
-    if (window.activeScheme && window.activeScheme.uuid === activeVersionsFor) app().openSchemeEditor(scheme);
-  }
-
   // ---------------------------------------------------------------- modals
   function openModal(id) { $(id).classList.add('open'); }
   function closeModal(id) { $(id).classList.remove('open'); }
@@ -459,7 +431,6 @@
     });
     $('csCancel').addEventListener('click', () => closeModal('schemeCreateModal'));
     $('csCreate').addEventListener('click', createScheme);
-    $('versionsClose').addEventListener('click', () => { closeModal('versionsModal'); activeVersionsFor = null; });
 
     $('wsBody').addEventListener('click', async (event) => {
       const btn = event.target.closest('[data-act]');
@@ -475,19 +446,12 @@
         }
         else if (act === 'download') download(uuid);
         else if (act === 'print') print(uuid);
-        else if (act === 'versions') await showVersions(uuid);
         else if (act === 'copy') await copyScheme(uuid);
         else if (act === 'delete') await deleteScheme(uuid);
         else if (act === 'email') await emailCopy(uuid);
       } catch (e) {
         alert(e.message);
       }
-    });
-
-    $('versionsBody').addEventListener('click', async (event) => {
-      const btn = event.target.closest('[data-act="restore"]');
-      if (!btn) return;
-      try { await restore(Number(btn.dataset.version)); } catch (e) { alert(e.message); }
     });
 
     document.querySelectorAll('.ws-modal').forEach((m) => {
@@ -508,9 +472,6 @@
           await transition(window.activeScheme.uuid, 'submit');
           alert('Submitted for HOD review.');
         } catch (e) { alert(e.message); }
-      });
-      $('asbVersions').addEventListener('click', () => {
-        if (window.activeScheme) showVersions(window.activeScheme.uuid);
       });
     }
   }
