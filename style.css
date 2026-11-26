@@ -1790,3 +1790,99 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; c
 .ws-card + .ws-card { border-top: 1px solid #eef1f5; }
 #userNameDisplay { max-width: 260px; }
 @media (max-width: 1200px) { #userNameDisplay { max-width: 170px; } }
+
+/* ==========================================================================
+   Overview motion & depth (Nov 2026)
+   Restrained entrance, hover and focus feedback. Everything is disabled
+   under prefers-reduced-motion.
+   ========================================================================== */
+@keyframes ov-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ov-value-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tab-pane.active { animation: ov-rise .28s cubic-bezier(.22, .61, .36, 1) both; }
+
+.ov-head {
+  position: relative;
+  overflow: hidden;
+  background-image: radial-gradient(1100px 220px at 100% 0%, #f4fbf9 0%, #ffffff 58%);
+  animation: ov-rise .34s cubic-bezier(.22, .61, .36, 1) both;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+.ov-head::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #0f766e, #0b5f5a);
+}
+.ov-head:hover { border-color: #dbe1e8; }
+
+.ov-metrics {
+  animation: ov-rise .34s cubic-bezier(.22, .61, .36, 1) .05s both;
+  transition: border-color .18s ease;
+}
+.ov-metrics:hover { border-color: #dbe1e8; }
+
+.ov-metric {
+  transition: background-color .18s ease;
+}
+.ov-metric:hover { background: #fafcfb; }
+.ov-metric-value {
+  animation: ov-value-in .3s ease both;
+  transition: color .18s ease;
+}
+.ov-metric:hover .ov-metric-value { color: #0f766e; }
+
+.ov-section { animation: ov-rise .34s cubic-bezier(.22, .61, .36, 1) .1s both; }
+.ov-section:nth-of-type(2) { animation-delay: .14s; }
+
+.ov-list { transition: border-color .18s ease; }
+.ov-list:hover { border-color: #dbe1e8; }
+
+.ov-row {
+  position: relative;
+  transition: background-color .16s ease;
+}
+.ov-row::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: #0f766e;
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform .2s cubic-bezier(.22, .61, .36, 1);
+}
+.ov-row:hover::before { transform: scaleY(1); }
+.ov-row:focus-visible {
+  outline: 2px solid rgba(15, 118, 110, .35);
+  outline-offset: -2px;
+}
+.ov-row-index { transition: color .16s ease; }
+.ov-row:hover .ov-row-index { color: #0f766e; }
+.ov-row-go { transition: color .16s ease, transform .18s cubic-bezier(.22, .61, .36, 1); }
+.ov-row:hover .ov-row-go { transform: translateX(3px); }
+
+.ov-admin { transition: border-color .18s ease; }
+.ov-admin:hover { border-color: #dbe1e8; }
+
+.ov-chip { transition: background-color .18s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-pane.active,
+  .ov-head, .ov-metrics, .ov-section, .ov-metric-value {
+    animation: none !important;
+  }
+  .ov-row, .ov-row::before, .ov-row-go, .ov-row-index,
+  .ov-metric, .ov-metric-value, .ov-head, .ov-list, .ov-admin {
+    transition: none !important;
+  }
+  .ov-row:hover .ov-row-go { transform: none; }
+}
