@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Autonomous Curriculum Portal - Scheme & Syllabus Engineering</title>
-  <link rel="stylesheet" href="style.css?v=20261124m">
+  <link rel="stylesheet" href="style.css?v=20261126d">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -370,30 +370,43 @@
         <div id="wsLoading" class="ws-loading">Loading schemes…</div>
         <div class="ws-head">
           <div>
-            <h2 class="ws-title">Scheme Workspace</h2>
-            <p class="ws-sub">Create teaching &amp; examination schemes, follow their approval, and reuse schemes shared by other faculty.</p>
+            <p class="ws-eyebrow">Scheme of examination</p>
+            <h2 class="ws-title">Scheme workspace</h2>
+            <p class="ws-sub">Create teaching and examination schemes, follow their approval, reuse what colleagues share.</p>
           </div>
-          <button id="btnCreateScheme" class="btn btn-primary" type="button">+ Create New Scheme</button>
+          <button id="btnCreateScheme" class="btn btn-primary btn-sm" type="button">Create scheme</button>
         </div>
 
         <div id="wsLanding" class="ws-landing">
           <button class="ws-card" data-scope="mine" type="button">
-            <span class="ws-card-count" id="wsCardMine">0</span>
-            <span class="ws-card-title">My Schemes</span>
-            <span class="ws-card-sub">Schemes you created or copied, with approval status.</span>
-            <span class="ws-card-go">Open →</span>
+            <span class="ws-card-body">
+              <span class="ws-card-title">My Schemes</span>
+              <span class="ws-card-sub">Schemes you created or copied, with approval status.</span>
+            </span>
+            <span class="ws-card-meta">
+              <span class="ws-card-count" id="wsCardMine">0</span>
+              <span class="ws-card-go">Open</span>
+            </span>
           </button>
           <button class="ws-card" data-scope="available" type="button">
-            <span class="ws-card-count" id="wsCardAvail">0</span>
-            <span class="ws-card-title">Available Schemes</span>
-            <span class="ws-card-sub">Approved schemes shared by other faculty, ready to copy.</span>
-            <span class="ws-card-go">Browse →</span>
+            <span class="ws-card-body">
+              <span class="ws-card-title">Available Schemes</span>
+              <span class="ws-card-sub">Approved schemes shared by other faculty, ready to copy.</span>
+            </span>
+            <span class="ws-card-meta">
+              <span class="ws-card-count" id="wsCardAvail">0</span>
+              <span class="ws-card-go">Browse</span>
+            </span>
           </button>
           <button class="ws-card" data-scope="approvals" id="wsCardApprovals" type="button" style="display: none;">
-            <span class="ws-card-count" id="wsCardApprovals">0</span>
-            <span class="ws-card-title">Approvals</span>
-            <span class="ws-card-sub">Schemes waiting for your HOD or Dean decision.</span>
-            <span class="ws-card-go">Review →</span>
+            <span class="ws-card-body">
+              <span class="ws-card-title">Approvals</span>
+              <span class="ws-card-sub">Schemes waiting for your HOD or Dean decision.</span>
+            </span>
+            <span class="ws-card-meta">
+              <span class="ws-card-count" id="wsCardApprovals">0</span>
+              <span class="ws-card-go">Review</span>
+            </span>
           </button>
         </div>
 
@@ -1262,7 +1275,7 @@
 
 <div id="wsMenu" class="ws-menu" hidden></div>
 
-<script src="app.js?v=20261124m"></script>
-<script src="schemes-ui.js?v=20261124m"></script>
+<script src="app.js?v=20261126d"></script>
+<script src="schemes-ui.js?v=20261126d"></script>
 </body>
 </html>

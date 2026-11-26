@@ -116,7 +116,7 @@
   }
 
   function showLanding() {
-    $('wsLanding').style.display = 'grid';
+    $('wsLanding').style.display = 'flex';
     $('wsListView').style.display = 'none';
     loadCounts();
   }
