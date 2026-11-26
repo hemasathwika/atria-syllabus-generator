@@ -1992,3 +1992,69 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; c
   .acct-logout:active { transform: none; }
 }
 .acct-role { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ==========================================================================
+   Syllabus builder header (Nov 2026)
+   Replaces the logo banner + two nav chips with a page header and a
+   three-step rail that shows where you are in the document flow.
+   ========================================================================== */
+.syl-head {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 24px;
+  padding: 18px 20px; margin-bottom: 12px;
+  background: #fff; border: 1px solid #e7eaf0; border-radius: 14px;
+  animation: ov-rise .3s cubic-bezier(.22, .61, .36, 1) both;
+}
+.syl-head-main { min-width: 0; }
+.syl-eyebrow { margin: 0 0 6px; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: #98a2b3; font-weight: 700; }
+.syl-title { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: -.02em; color: #0b1220; }
+.syl-sub { margin: 4px 0 0; font-size: 12.5px; color: #667085; }
+
+.syl-actions { display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; }
+.syl-select { display: flex; flex-direction: column; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #98a2b3; }
+.syl-course {
+  min-width: 280px; padding: 7px 10px;
+  border: 1px solid #e7eaf0; border-radius: 8px; background: #fff;
+  font-family: inherit; font-size: 12.5px; color: #0b1220;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+.syl-course:focus { outline: none; border-color: #0f766e; box-shadow: 0 0 0 3px rgba(15, 118, 110, .12); }
+
+.syl-actions .btn { transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease; }
+.syl-actions .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px -10px rgba(15, 23, 42, .5); }
+
+.syl-steps { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 0 2px; }
+.syl-step {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 0; background: none; padding: 4px 2px;
+  font-family: inherit; font-size: 12px; font-weight: 600; color: #98a2b3;
+  cursor: pointer; transition: color .16s ease;
+}
+.syl-step:hover { color: #0b1220; }
+.syl-step:focus-visible { outline: 2px solid rgba(15, 118, 110, .35); outline-offset: 3px; border-radius: 4px; }
+.syl-step-dot { width: 8px; height: 8px; border-radius: 50%; background: #dbe1e8; transition: background-color .2s ease; }
+.syl-step.is-done { color: #0f766e; }
+.syl-step.is-done .syl-step-dot { background: #0f766e; }
+.syl-step.is-current { color: #0b1220; }
+.syl-step.is-current .syl-step-dot { background: #0f766e; animation: syl-pulse 2.6s ease-in-out infinite; }
+
+.syl-step-line {
+  width: 44px; height: 1px; background: #e7eaf0;
+  transform-origin: left;
+  animation: syl-grow .5s .15s cubic-bezier(.22, .61, .36, 1) both;
+}
+@keyframes syl-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes syl-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(15, 118, 110, .14); }
+  50%      { box-shadow: 0 0 0 7px rgba(15, 118, 110, .05); }
+}
+
+@media (max-width: 900px) {
+  .syl-head { flex-direction: column; }
+  .syl-course { min-width: 0; width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .syl-head, .syl-step-line { animation: none !important; }
+  .syl-step.is-current .syl-step-dot { animation: none; box-shadow: 0 0 0 4px rgba(15, 118, 110, .14); }
+  .syl-actions .btn:hover { transform: none; box-shadow: none; }
+}

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Autonomous Curriculum Portal - Scheme & Syllabus Engineering</title>
-  <link rel="stylesheet" href="style.css?v=20261126h">
+  <link rel="stylesheet" href="style.css?v=20261126i">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -588,35 +588,37 @@
     <!-- TAB 2: GUIDED SYLLABUS BUILDER (STEPPER)    -->
     <!-- ========================================== -->
     <section id="tab-syllabus" class="tab-pane">
-      <!-- Official Atria Syllabus Header Banner -->
-      <div class="card" style="margin-bottom: 16px; padding: 12px 20px; position: relative; min-height: 56px; background: #ffffff;">
-        <div style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%);">
-          <img src="assets/atria_logo.png" alt="Atria Institute of Technology" style="height: 44px; max-width: 220px; object-fit: contain;">
+      <!-- Syllabus page header: context on the left, actions on the right -->
+      <div class="syl-head">
+        <div class="syl-head-main">
+          <p class="syl-eyebrow">Course syllabus</p>
+          <h2 class="syl-title">Syllabus builder</h2>
+          <p class="syl-sub">One section at a time — outcomes, modules, practicals and references.</p>
         </div>
-        <div style="text-align: center; padding: 0 40px;">
-          <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px;">ATRIA INSTITUTE OF TECHNOLOGY (AUTONOMOUS)</h3>
-          <p style="margin: 2px 0 0 0; font-size: 11.5px; color: var(--text-muted); font-weight: 600;">Outcome-Based Education (OBE) • Detailed Course Syllabus Engineering</p>
+        <div class="syl-actions">
+          <label class="syl-select">
+            <span>Course</span>
+            <select id="sylCourseSelect" class="syl-course"></select>
+          </label>
+          <button class="btn btn-primary btn-sm" id="btnSaveSyllabus" type="button">Save syllabus</button>
+          <button class="btn btn-outline btn-sm" id="btnExportSyllabusQuick" type="button" title="Print this syllabus">Print</button>
+          <button class="btn btn-outline btn-sm" id="btnDownloadSyllabusDocxQuick" type="button" title="Download this syllabus as Word (.docx)">DOCX</button>
         </div>
       </div>
 
-      <div class="pane-header">
-        <div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-            <button class="btn btn-secondary btn-sm" onclick="navigateToTab('tab-scheme')">⬅️ Back to Scheme</button>
-            <span style="color: var(--text-muted); font-size: 12px;">•</span>
-            <button class="btn btn-secondary btn-sm" onclick="navigateToTab('tab-preview')">Next: Document Preview ➔</button>
-          </div>
-          <h2>Course Syllabus Builder</h2>
-          <p class="text-muted">A structured, focused wizard that guides you through one section at a time without clutter.</p>
-        </div>
-        <div class="pane-actions">
-          <label for="sylCourseSelect">Course:</label>
-          <select id="sylCourseSelect" class="input-select" style="min-width: 280px;"></select>
-          <button class="btn btn-primary" id="btnSaveSyllabus">💾 Save Syllabus</button>
-          <button class="btn btn-secondary" id="btnExportSyllabusQuick" title="View & Print This Syllabus Only">🖨️ Print Syllabus</button>
-          <button class="btn btn-secondary" id="btnDownloadSyllabusDocxQuick" title="Download This Syllabus as Word (.docx)">📄 Syllabus (.docx)</button>
-        </div>
-      </div>
+      <nav class="syl-steps" aria-label="Document workflow">
+        <button class="syl-step is-done" type="button" onclick="navigateToTab('tab-scheme')">
+          <span class="syl-step-dot"></span>Scheme
+        </button>
+        <span class="syl-step-line"></span>
+        <button class="syl-step is-current" type="button" aria-current="step">
+          <span class="syl-step-dot"></span>Syllabus
+        </button>
+        <span class="syl-step-line"></span>
+        <button class="syl-step" type="button" onclick="navigateToTab('tab-preview')">
+          <span class="syl-step-dot"></span>Document
+        </button>
+      </nav>
 
       <!-- Auth Notice Banner in Syllabus -->
       <div id="authNoticeSyllabus" class="auth-notice-banner" style="margin-bottom: 16px;"></div>
@@ -1284,7 +1286,7 @@
 
 <div id="wsMenu" class="ws-menu" hidden></div>
 
-<script src="app.js?v=20261126h"></script>
-<script src="schemes-ui.js?v=20261126h"></script>
+<script src="app.js?v=20261126i"></script>
+<script src="schemes-ui.js?v=20261126i"></script>
 </body>
 </html>
