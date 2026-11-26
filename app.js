@@ -247,7 +247,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (userGuestBlock) userGuestBlock.style.display = 'none';
 
       if (userRoleBadge) {
-        userRoleBadge.textContent = currentUser.role;
+        const shortRoles = {
+          'AUTHORIZED COORDINATOR': 'Coordinator',
+          'FACULTY (GENERAL) (VIEW-ONLY)': 'Faculty',
+          'FACULTY': 'Faculty',
+          'DEAN': 'Dean',
+          'HOD': 'HOD',
+          'ADMIN': 'Admin'
+        };
+        userRoleBadge.textContent = shortRoles[(currentUser.role || '').toUpperCase()] || currentUser.role;
         // Styling lives in CSS (.acct-role). Setting a background here produced a
         // coloured chip with dark text, which read as an empty coloured bar.
         userRoleBadge.style.background = '';

@@ -2058,3 +2058,74 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; c
   .syl-step.is-current .syl-step-dot { animation: none; box-shadow: 0 0 0 4px rgba(15, 118, 110, .14); }
   .syl-actions .btn:hover { transform: none; box-shadow: none; }
 }
+
+/* ==========================================================================
+   Overview hero: portico assembled from pieces (Nov 2026)
+   Pure SVG + CSS. Decorative only; replays when the Overview tab opens.
+   ========================================================================== */
+.ov-hero {
+  position: relative;
+  display: flex; align-items: center; gap: 22px;
+  padding: 14px 20px; margin-bottom: 14px;
+  background: #fff; border: 1px solid #e7eaf0; border-radius: 14px;
+  overflow: hidden;
+}
+.ov-hero::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(340px 160px at 12% 50%, rgba(15, 118, 110, .07), transparent 70%);
+  opacity: 0; transition: opacity .8s ease;
+  pointer-events: none;
+}
+.ov-hero.play::after { opacity: 1; }
+
+.ov-hero-art { flex: 0 0 216px; width: 216px; height: auto; display: block; }
+.ov-hero-art rect,
+.ov-hero-art polygon,
+.ov-hero-art circle {
+  fill: rgba(15, 118, 110, .07);
+  stroke: #0f766e;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.ov-hero-copy { min-width: 0; }
+.ov-hero-eyebrow {
+  margin: 0 0 4px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: #98a2b3; font-weight: 700;
+}
+.ov-hero-line { margin: 0; max-width: 560px; font-size: 12.5px; line-height: 1.5; color: #667085; }
+
+/* pieces start hidden; the play class runs the assembly */
+.ov-hero .piece { opacity: 0; transform-box: fill-box; transform-origin: center bottom; }
+.ov-hero.play .piece { animation: piece-in .52s cubic-bezier(.22, .61, .36, 1) both; }
+
+.ov-hero.play .p-base-2  { animation-delay: .00s; }
+.ov-hero.play .p-base-1  { animation-delay: .06s; }
+.ov-hero.play .p-wing-left  { animation-delay: .12s; }
+.ov-hero.play .p-wing-right { animation-delay: .12s; }
+.ov-hero.play .p-col-1 { animation-delay: .18s; }
+.ov-hero.play .p-col-2 { animation-delay: .23s; }
+.ov-hero.play .p-col-3 { animation-delay: .28s; }
+.ov-hero.play .p-col-4 { animation-delay: .33s; }
+.ov-hero.play .p-col-5 { animation-delay: .38s; }
+.ov-hero.play .p-lintel   { animation-delay: .44s; }
+.ov-hero.play .p-pediment { animation-delay: .52s; }
+.ov-hero.play .p-finial   { animation-delay: .62s; }
+
+@keyframes piece-in {
+  0%   { opacity: 0; transform: translateY(12px) scale(.96); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 860px) {
+  .ov-hero { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .ov-hero-art { flex: 0 0 auto; width: 180px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ov-hero .piece { opacity: 1 !important; transform: none !important; animation: none !important; }
+  .ov-hero::after { opacity: 1; transition: none; }
+}

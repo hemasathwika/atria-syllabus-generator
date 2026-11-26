@@ -582,6 +582,23 @@
     setTimeout(init, 250);
   });
 
+  // Overview hero: replay the assembly each time the tab becomes active.
+  const hero = document.getElementById('ovHero');
+  if (hero) {
+    const playHero = () => {
+      hero.classList.remove('play');
+      void hero.getBoundingClientRect().width;
+      hero.classList.add('play');
+    };
+    const homeTab = document.getElementById('tab-home');
+    if (homeTab) {
+      new MutationObserver(() => {
+        if (homeTab.classList.contains('active')) playHero();
+      }).observe(homeTab, { attributes: true, attributeFilter: ['class'] });
+      if (homeTab.classList.contains('active')) setTimeout(playHero, 120);
+    }
+  }
+
   window.AtriaSchemes = {
   reload: () => { showLanding(); },
   loadCounts,

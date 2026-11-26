@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Autonomous Curriculum Portal - Scheme & Syllabus Engineering</title>
-  <link rel="stylesheet" href="style.css?v=20261126i">
+  <link rel="stylesheet" href="style.css?v=20261126l">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -271,6 +271,46 @@
     <!-- TAB 0: HOME / GUIDED DASHBOARD OVERVIEW     -->
     <!-- ========================================== -->
     <section id="tab-home" class="tab-pane active">
+      <!-- Assembling portico: decorative, replays when the Overview tab opens -->
+      <section class="ov-hero" id="ovHero" aria-hidden="true">
+        <svg class="ov-hero-art" viewBox="0 0 340 150" role="presentation" focusable="false">
+          <g class="piece p-base-2">
+            <rect x="58" y="126" width="224" height="9" rx="1.5"></rect>
+          </g>
+          <g class="piece p-base-1">
+            <rect x="44" y="116" width="252" height="10" rx="1.5"></rect>
+          </g>
+          <g class="piece p-wing-left">
+            <rect x="28" y="74" width="24" height="42" rx="2"></rect>
+            <rect x="32" y="68" width="16" height="6" rx="1"></rect>
+          </g>
+          <g class="piece p-wing-right">
+            <rect x="288" y="74" width="24" height="42" rx="2"></rect>
+            <rect x="292" y="68" width="16" height="6" rx="1"></rect>
+          </g>
+          <g class="piece p-col-1"><rect x="72" y="62" width="13" height="54" rx="2"></rect><rect x="68" y="57" width="21" height="5" rx="1"></rect></g>
+          <g class="piece p-col-2"><rect x="116" y="62" width="13" height="54" rx="2"></rect><rect x="112" y="57" width="21" height="5" rx="1"></rect></g>
+          <g class="piece p-col-3"><rect x="160" y="62" width="13" height="54" rx="2"></rect><rect x="156" y="57" width="21" height="5" rx="1"></rect></g>
+          <g class="piece p-col-4"><rect x="204" y="62" width="13" height="54" rx="2"></rect><rect x="200" y="57" width="21" height="5" rx="1"></rect></g>
+          <g class="piece p-col-5"><rect x="248" y="62" width="13" height="54" rx="2"></rect><rect x="244" y="57" width="21" height="5" rx="1"></rect></g>
+          <g class="piece p-lintel">
+            <rect x="56" y="47" width="228" height="10" rx="1.5"></rect>
+          </g>
+          <g class="piece p-pediment">
+            <polygon points="50,47 170,10 290,47"></polygon>
+            <rect x="46" y="43" width="248" height="4" rx="1"></rect>
+          </g>
+          <g class="piece p-finial">
+            <rect x="168" y="2" width="4" height="10" rx="1"></rect>
+            <circle cx="170" cy="2" r="2.6"></circle>
+          </g>
+        </svg>
+        <div class="ov-hero-copy">
+          <p class="ov-hero-eyebrow">Curriculum engineering</p>
+          <p class="ov-hero-line">Schemes, syllabi and approvals in one place — assembled the way a board expects them.</p>
+        </div>
+      </section>
+
       <div class="ov-head">
         <div class="ov-head-main">
           <p class="ov-eyebrow">Overview</p>
@@ -1286,7 +1326,7 @@
 
 <div id="wsMenu" class="ws-menu" hidden></div>
 
-<script src="app.js?v=20261126i"></script>
-<script src="schemes-ui.js?v=20261126i"></script>
+<script src="app.js?v=20261126l"></script>
+<script src="schemes-ui.js?v=20261126l"></script>
 </body>
 </html>
