@@ -582,5 +582,15 @@
     setTimeout(init, 250);
   });
 
-  window.AtriaSchemes = { reload: () => { showLanding(); }, loadCounts };
+  window.AtriaSchemes = {
+  reload: () => { showLanding(); },
+  loadCounts,
+  openCreate() {
+    window.navigateToTab('tab-scheme');
+    setTimeout(() => {
+      const btn = document.getElementById('btnCreateScheme');
+      if (btn) btn.click();
+    }, 260);
+  }
+};
 })();

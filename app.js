@@ -1883,6 +1883,13 @@ Dr. Bhavana Nair, Assistant Professor, bhavana_cse@atria.edu.in, CSE, faculty@12
     if (greetingName) greetingName.textContent = currentUser.id === 'GUEST' ? 'Welcome, Guest Viewer' : `Welcome, ${currentUser.name}`;
     if (homeDeptName) homeDeptName.textContent = `${dept.name} (${dept.code})`;
 
+    const ovToday = document.getElementById('ovToday');
+    if (ovToday) {
+      ovToday.textContent = new Date().toLocaleDateString('en-IN', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+    }
+
     if (roleBadge) {
       roleBadge.textContent = currentUser.role || 'VIEW-ONLY';
       roleBadge.style.background = currentUser.badge_color || (currentUser.can_manage_faculty ? '#1e3a8a' : (currentUser.can_edit ? '#047857' : '#64748b'));

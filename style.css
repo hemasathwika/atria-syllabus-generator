@@ -1886,3 +1886,46 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; c
   }
   .ov-row:hover .ov-row-go { transform: none; }
 }
+
+/* Overview header: de-duplicated page header, with a drawn rule and a slow sheen */
+.ov-title {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 10px;
+}
+.ov-title::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 34px; height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, #0f766e, #2dd4bf);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: ov-rule .55s .15s cubic-bezier(.22, .61, .36, 1) forwards;
+}
+@keyframes ov-rule { to { transform: scaleX(1); } }
+
+.ov-head::before {
+  background: linear-gradient(180deg, #0f766e 0%, #0b5f5a 50%, #0f766e 100%);
+  background-size: 100% 220%;
+  animation: ov-sheen 8s ease-in-out infinite;
+}
+@keyframes ov-sheen {
+  0%   { background-position: 0 0; }
+  50%  { background-position: 0 100%; }
+  100% { background-position: 0 0; }
+}
+
+.ov-head-actions .btn {
+  transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease, color .16s ease;
+}
+.ov-head-actions .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px -10px rgba(15, 23, 42, .55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ov-title::after { animation: none; transform: scaleX(1); }
+  .ov-head::before { animation: none; }
+  .ov-head-actions .btn:hover { transform: none; box-shadow: none; }
+}
