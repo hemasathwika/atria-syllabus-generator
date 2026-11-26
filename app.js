@@ -220,13 +220,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // Once per browser session: a choreographed intro on every failed login
-    // would be exhausting.
-    try {
-      if (sessionStorage.getItem('atriaIntroPlayed')) { intro.remove(); return; }
-      sessionStorage.setItem('atriaIntroPlayed', '1');
-    } catch (e) { /* private mode: just play it */ }
-
+    // Replays on every page load. The in-memory flag above still stops it from
+    // firing again when the gate re-renders after a failed login attempt.
     gate.classList.add('intro-play');
 
     const finish = () => {
@@ -234,7 +229,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (intro.parentNode) intro.parentNode.removeChild(intro);
     };
     intro.addEventListener('click', finish, { once: true });
-    setTimeout(finish, 2200);
+    setTimeout(finish, 3400);
   }
 
   function showAuthLandingView(message = '') {
