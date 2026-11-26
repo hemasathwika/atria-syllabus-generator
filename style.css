@@ -1929,3 +1929,66 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; c
   .ov-head::before { animation: none; }
   .ov-head-actions .btn:hover { transform: none; box-shadow: none; }
 }
+
+/* ==========================================================================
+   Account cluster in the top bar (Nov 2026)
+   Replaces the bare role badge + name + text button with an avatar, a
+   two-line identity and an animated icon-only sign-out control.
+   ========================================================================== */
+.navbar { overflow: visible; }
+
+.acct { display: flex; align-items: center; gap: 10px; }
+
+.acct-avatar {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, #d8f5ef, #a7e8dd);
+  box-shadow: inset 0 0 0 1px rgba(15, 118, 110, .18);
+  color: #0b3b39; font-size: 11.5px; font-weight: 700; letter-spacing: .02em;
+  user-select: none;
+}
+
+.acct-id { display: flex; flex-direction: column; line-height: 1.2; max-width: 190px; }
+.acct-name {
+  font-size: 12.5px; font-weight: 600; color: #0b1220;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.acct-role {
+  align-self: flex-start; margin-top: 2px; padding: 1px 7px; border-radius: 999px;
+  background: #eef2f7; color: #475467; font-size: 9.5px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+}
+
+.acct-logout {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border: 1px solid #e7eaf0; border-radius: 10px;
+  background: #fff; color: #667085; cursor: pointer;
+  transition: color .18s ease, border-color .18s ease, background-color .18s ease, transform .12s ease;
+}
+.acct-logout svg { transition: transform .25s cubic-bezier(.22, .61, .36, 1); }
+.acct-logout:hover { color: #b42318; border-color: #fecdca; background: #fef3f2; }
+.acct-logout:hover svg { transform: translateX(2px); }
+.acct-logout:active { transform: scale(.94); }
+.acct-logout:focus-visible { outline: 2px solid rgba(15, 118, 110, .35); outline-offset: 2px; }
+
+.acct-logout::after {
+  content: attr(data-tip);
+  position: absolute; top: calc(100% + 8px); right: 0;
+  padding: 5px 9px; border-radius: 6px; background: #0b1220; color: #fff;
+  font-size: 11px; line-height: 1; white-space: nowrap;
+  opacity: 0; transform: translateY(-3px); pointer-events: none;
+  transition: opacity .16s ease, transform .16s ease;
+}
+.acct-logout:hover::after, .acct-logout:focus-visible::after { opacity: 1; transform: translateY(0); }
+
+.badge.dept-pill {
+  background: #f2f4f7; color: #475467; border: 0;
+  font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acct-logout, .acct-logout svg, .acct-logout::after { transition: none !important; }
+  .acct-logout:active { transform: none; }
+}
+.acct-role { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

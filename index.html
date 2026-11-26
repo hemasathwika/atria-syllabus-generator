@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Autonomous Curriculum Portal - Scheme & Syllabus Engineering</title>
-  <link rel="stylesheet" href="style.css?v=20261126f">
+  <link rel="stylesheet" href="style.css?v=20261126h">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -224,11 +224,20 @@
       <!-- Authentication / User Widget -->
       <div class="user-auth-wrap" style="display: flex; align-items: center; gap: 8px;">
         <!-- Logged in state -->
-        <div id="userLoggedInBlock" style="display: none; align-items: center; gap: 8px;">
-          <span class="badge" id="userRoleBadge" style="background: #1e3a8a; color: #fff; font-size: 11.5px; font-weight: 700;">HOD</span>
-          <span id="userNameDisplay" style="font-weight: 600; font-size: 13px; color: var(--text-main);">User</span>
-          <button class="btn btn-secondary" id="btnManageAccess" style="padding: 5px 10px; font-size: 12px; display: none; background: #fff;">⚙️ Manage Faculty Access</button>
-          <button class="btn btn-secondary" id="btnLogout" style="padding: 5px 10px; font-size: 12px; background: #fff;">Logout</button>
+        <div id="userLoggedInBlock" class="acct" style="display: none;">
+          <span class="acct-avatar" id="acctAvatar" aria-hidden="true">HS</span>
+          <span class="acct-id">
+            <span class="acct-name" id="userNameDisplay">User</span>
+            <span class="acct-role" id="userRoleBadge">Faculty</span>
+          </span>
+          <button class="btn btn-secondary btn-sm" id="btnManageAccess" type="button" style="display: none;">Manage access</button>
+          <button class="acct-logout" id="btnLogout" type="button" title="Sign out" aria-label="Sign out" data-tip="Sign out">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
         </div>
         <!-- Guest / View-Only state -->
         <div id="userGuestBlock" style="display: flex; align-items: center; gap: 8px;">
@@ -1275,7 +1284,7 @@
 
 <div id="wsMenu" class="ws-menu" hidden></div>
 
-<script src="app.js?v=20261126f"></script>
-<script src="schemes-ui.js?v=20261126f"></script>
+<script src="app.js?v=20261126h"></script>
+<script src="schemes-ui.js?v=20261126h"></script>
 </body>
 </html>

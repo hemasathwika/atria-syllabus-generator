@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const dept = appState.departments.find(d => d.code === userDept) || { code: userDept, name: userDept };
       const opt = document.createElement('option');
       opt.value = dept.code;
-      opt.textContent = `🔒 ${dept.name} (${dept.code}) [Your Dept]`;
+      opt.textContent = `${dept.name} (${dept.code})`;
       opt.selected = true;
       deptSelect.appendChild(opt);
 
@@ -145,8 +145,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (deptBadge) {
       if (isDeptBound) {
-        deptBadge.textContent = `🔒 ${dept.code} Only`;
-        deptBadge.className = 'badge badge-active';
+        deptBadge.textContent = dept.code;
+        deptBadge.className = 'badge dept-pill';
         deptBadge.title = `Access strictly confined to ${dept.name}`;
       } else {
         deptBadge.textContent = dept.status;
@@ -248,11 +248,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (userRoleBadge) {
         userRoleBadge.textContent = currentUser.role;
-        userRoleBadge.style.background = currentUser.badge_color || (currentUser.can_manage_faculty ? '#1e3a8a' : '#047857');
+        // Styling lives in CSS (.acct-role). Setting a background here produced a
+        // coloured chip with dark text, which read as an empty coloured bar.
+        userRoleBadge.style.background = '';
       }
       if (userNameDisplay) {
         const deptTag = isDeptBound ? ` [${userDept}]` : '';
-        userNameDisplay.textContent = `${currentUser.name} (${currentUser.title || currentUser.role}${deptTag})`;
+        userNameDisplay.textContent = currentUser.name;
+      }
+      const acctAvatar = document.getElementById('acctAvatar');
+      if (acctAvatar) {
+        const clean = String(currentUser.name || 'User').replace(/^(Dr\.|Prof\.|Mr\.|Ms\.|Mrs\.)\s+/i, '').trim();
+        const parts = clean.split(/\s+/);
+        acctAvatar.textContent = ((parts[0] || 'U')[0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
       }
       if (btnManageAccess) {
         btnManageAccess.style.display = currentUser.can_manage_faculty ? 'inline-block' : 'none';
