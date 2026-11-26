@@ -2129,3 +2129,60 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; c
   .ov-hero .piece { opacity: 1 !important; transform: none !important; animation: none !important; }
   .ov-hero::after { opacity: 1; transition: none; }
 }
+
+/* ==========================================================================
+   Sign-in intro (Nov 2026)
+   A ball drops, squashes twice, splits into halves that fly apart, and the
+   frosted card settles in behind it. Runs once per browser session.
+   ========================================================================== */
+.login-intro {
+  position: fixed; inset: 0; z-index: 60;
+  display: grid; place-items: center;
+  pointer-events: none;
+  animation: intro-out .4s cubic-bezier(.4, 0, .2, 1) 1.55s forwards;
+}
+.intro-ball { display: block; filter: drop-shadow(0 20px 34px rgba(0, 0, 0, .38)); }
+.intro-skip {
+  position: absolute; bottom: 34px; left: 50%; transform: translateX(-50%);
+  font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(255, 255, 255, .72); font-weight: 600;
+}
+
+.intro-play .intro-ball { animation: intro-drop 1.15s cubic-bezier(.33, 0, .67, 1) both; }
+.ball-half { opacity: 0; transform-origin: 60px 60px; }
+.intro-play .ball-whole { animation: intro-hide .16s ease .94s forwards; }
+.intro-play .half-left  { animation: intro-split-left .52s cubic-bezier(.22, .61, .36, 1) .94s forwards; }
+.intro-play .half-right { animation: intro-split-right .52s cubic-bezier(.22, .61, .36, 1) .94s forwards; }
+
+.intro-play .auth-landing-card { animation: intro-card .55s cubic-bezier(.22, .61, .36, 1) 1.05s both; }
+
+@keyframes intro-drop {
+  0%   { transform: translateY(-180px) scale(.92); opacity: 0; }
+  12%  { opacity: 1; }
+  52%  { transform: translateY(0) scale(1.08, .88); }
+  66%  { transform: translateY(-42px) scale(.95, 1.05); }
+  80%  { transform: translateY(0) scale(1.05, .95); }
+  92%  { transform: translateY(0) scale(1, 1); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes intro-hide { to { opacity: 0; } }
+@keyframes intro-split-left {
+  0%   { opacity: 1; transform: translateX(0) rotate(0deg); }
+  100% { opacity: 0; transform: translateX(-76px) rotate(-17deg); }
+}
+@keyframes intro-split-right {
+  0%   { opacity: 1; transform: translateX(0) rotate(0deg); }
+  100% { opacity: 0; transform: translateX(76px) rotate(17deg); }
+}
+@keyframes intro-card {
+  from { opacity: 0; transform: translateY(10px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes intro-out {
+  to { opacity: 0; visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-intro { display: none !important; }
+  .intro-play .auth-landing-card { animation: none !important; }
+}

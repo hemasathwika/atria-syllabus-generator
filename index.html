@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Autonomous Curriculum Portal - Scheme & Syllabus Engineering</title>
-  <link rel="stylesheet" href="style.css?v=20261126l">
+  <link rel="stylesheet" href="style.css?v=20261126m">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -14,6 +14,28 @@
   <!-- 1. FULL-PAGE AUTHENTICATION LANDING SCREEN (First-Time User Gate) -->
   <!-- ================================================================= -->
   <div id="authLandingView" class="auth-landing-screen">
+    <!-- Sign-in intro: a ball drops, bounces twice, splits, then the card settles in -->
+    <div id="loginIntro" class="login-intro" aria-hidden="true">
+      <svg class="intro-ball" viewBox="0 0 120 120" width="120" height="120" focusable="false">
+        <defs>
+          <radialGradient id="introBallGrad" cx="34%" cy="28%" r="76%">
+            <stop offset="0%" stop-color="#5eead4"></stop>
+            <stop offset="55%" stop-color="#14b8a6"></stop>
+            <stop offset="100%" stop-color="#0b5f5a"></stop>
+          </radialGradient>
+        </defs>
+        <g class="ball-whole">
+          <circle cx="60" cy="60" r="26" fill="url(#introBallGrad)"></circle>
+          <ellipse cx="50" cy="48" rx="7" ry="4.5" fill="rgba(255,255,255,.45)" transform="rotate(-24 50 48)"></ellipse>
+        </g>
+        <g class="ball-half half-left">
+          <path d="M60 34 A26 26 0 0 0 60 86 Z" fill="url(#introBallGrad)"></path>
+        </g>
+        <g class="ball-half half-right">
+          <path d="M60 34 A26 26 0 0 1 60 86 Z" fill="url(#introBallGrad)"></path>
+        </g>
+      </svg>
+    </div>
     <div class="auth-landing-card">
       <div class="auth-landing-header">
         <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
@@ -1326,7 +1348,7 @@
 
 <div id="wsMenu" class="ws-menu" hidden></div>
 
-<script src="app.js?v=20261126l"></script>
-<script src="schemes-ui.js?v=20261126l"></script>
+<script src="app.js?v=20261126m"></script>
+<script src="schemes-ui.js?v=20261126m"></script>
 </body>
 </html>

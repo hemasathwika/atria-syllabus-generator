@@ -205,6 +205,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   const appMainView = document.getElementById('appMainView');
   const btnContinueAsGuest = document.getElementById('btnContinueAsGuest');
 
+  let loginIntroPlayed = false;
+
+  function maybePlayLoginIntro() {
+    if (loginIntroPlayed) return;
+    loginIntroPlayed = true;
+
+    const intro = document.getElementById('loginIntro');
+    const gate = document.getElementById('authLandingView');
+    if (!intro || !gate) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      intro.remove();
+      return;
+    }
+
+    // Once per browser session: a choreographed intro on every failed login
+    // would be exhausting.
+    try {
+      if (sessionStorage.getItem('atriaIntroPlayed')) { intro.remove(); return; }
+      sessionStorage.setItem('atriaIntroPlayed', '1');
+    } catch (e) { /* private mode: just play it */ }
+
+    gate.classList.add('intro-play');
+
+    const finish = () => {
+      gate.classList.remove('intro-play');
+      if (intro.parentNode) intro.parentNode.removeChild(intro);
+    };
+    intro.addEventListener('click', finish, { once: true });
+    setTimeout(finish, 2200);
+  }
+
   function showAuthLandingView(message = '') {
     if (authLandingView) authLandingView.style.display = 'flex';
     if (appMainView) appMainView.style.display = 'none';
@@ -218,6 +250,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
     window.scrollTo({ top: 0, behavior: 'instant' });
+    maybePlayLoginIntro();
   }
 
   function showAppMainView() {
